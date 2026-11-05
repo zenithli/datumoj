@@ -1,0 +1,47 @@
+{
+  "repository": "gorou5/datumoj",
+  "pull_request": 100,
+  "target_branch": "fix/source-monitor-enabled-since",
+  "commit": "df79017598c9a0dbd9ef263c4ed51e559dcdb43c",
+  "tree": "797167b0b9bec7e4b73867a0adff0c1cbaa85c52",
+  "parents": [
+    "8d0fa3f7d38af7cb157d7a4f625d15d95dd4c9ec",
+    "8f5bc7a5204c1b7eb235004c4c304fa72aea600a"
+  ],
+  "bundle_ref": "refs/heads/dot/pr100-sync-8f5bc7a-20261105",
+  "bundle_file": "pr100-sync-8f5bc7a.bundle",
+  "bundle_bytes": 3140,
+  "bundle_sha256": "e05f3ac96e32deb787493a8627bd11d28d4f27caa4b936db476afaceace59f10",
+  "new_commits": 1,
+  "bundle_objects": 13,
+  "source_patch_sha256": "15d8deb53f8880e874e6707a704f84d10cc7200be1da8dce5fe5f37f2567261c",
+  "checks": {
+    "apply": "passed",
+    "diff_check": "passed",
+    "python_ast_files": 5,
+    "ruff": "passed",
+    "schema_descriptions_passed": 18,
+    "pytest_locked_baseline": {
+      "passed": 210,
+      "failed": 2,
+      "warnings": 1,
+      "seconds": 194.97
+    },
+    "pytest_locked_patched": {
+      "passed": 225,
+      "failed": 2,
+      "warnings": 1,
+      "seconds": 177.8
+    },
+    "pytest_patched_with_socksio_1_0_0": {
+      "passed": 227,
+      "failed": 0,
+      "warnings": 1,
+      "seconds": 161.46
+    },
+    "full_pytest": "not run",
+    "github_ci": "not run",
+    "production": "not tested"
+  },
+  "remote_writes": "none"
+}

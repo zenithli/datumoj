@@ -1,0 +1,7 @@
+pr100-sync-8f5bc7a.bundle is okay
+The bundle contains this ref:
+df79017598c9a0dbd9ef263c4ed51e559dcdb43c refs/heads/dot/pr100-sync-8f5bc7a-20261105
+The bundle requires these 2 refs:
+8f5bc7a5204c1b7eb235004c4c304fa72aea600a 
+8d0fa3f7d38af7cb157d7a4f625d15d95dd4c9ec 
+The bundle uses this hash algorithm: sha1
