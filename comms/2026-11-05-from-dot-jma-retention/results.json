@@ -1,0 +1,265 @@
+{
+  "source_commit": "e602697f925e4d7f98cb01d4d5b42389ca39b68c",
+  "scope": "original AST functions; synthetic SQLite and in-memory store only",
+  "results": {
+    "steady_3_days": [
+      {
+        "day": 0,
+        "marked_at_day": 0.0,
+        "marked_new": 1,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 1,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 2,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 3,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      }
+    ],
+    "steady_7_days": [
+      {
+        "day": 0,
+        "marked_at_day": null,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 1,
+        "marked_at_day": null,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 2,
+        "marked_at_day": null,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 3,
+        "marked_at_day": null,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 4,
+        "marked_at_day": 4.0,
+        "marked_new": 1,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 1
+      },
+      {
+        "day": 5,
+        "marked_at_day": 4.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 1
+      },
+      {
+        "day": 6,
+        "marked_at_day": 4.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 1
+      },
+      {
+        "day": 7,
+        "marked_at_day": 4.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 1
+      }
+    ],
+    "migration_at_day_2_first_marker_then_delete_day_5": [
+      {
+        "day": 2,
+        "marked_at_day": 2.0,
+        "marked_new": 1,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 3,
+        "marked_at_day": 2.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 4,
+        "marked_at_day": 2.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 5,
+        "marked_at_day": 2.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      }
+    ],
+    "migration_does_not_reset_marker": [
+      {
+        "day": 6,
+        "marked_at_day": 4.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 7,
+        "marked_at_day": 4.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      }
+    ],
+    "first_mark_after_outage_day_10_delete_day_13": [
+      {
+        "day": 10,
+        "marked_at_day": 10.0,
+        "marked_new": 1,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 12,
+        "marked_at_day": 10.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 13,
+        "marked_at_day": 10.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      }
+    ],
+    "raw_retention_protections": {
+      "feed": false,
+      "entry": true,
+      "pending": false,
+      "staged": false,
+      "failed": false,
+      "shared_sha_expiry_day": 31
+    },
+    "marked_sha_not_raw_ref_but_pending_blocks_cleanup": {
+      "day": 10,
+      "marked_at_day": 0.0,
+      "marked_new": 0,
+      "raw_deleted": 0,
+      "reclaimable_raw": 0,
+      "generation_deleted": 0
+    },
+    "premark_generation_expires_before_raw_deletion": {
+      "day": 3,
+      "marked_at_day": 0.0,
+      "marked_new": 0,
+      "raw_deleted": 1,
+      "reclaimable_raw": 1,
+      "generation_deleted": 1
+    },
+    "exact_72h_boundary": {
+      "one_microsecond_early_deleted": 0,
+      "at_72h_deleted": 1
+    },
+    "refetch_extends_expiry_without_resetting_mark": [
+      {
+        "day": 3,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 0
+      },
+      {
+        "day": 4,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 0,
+        "generation_deleted": 1
+      },
+      {
+        "day": 5,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      }
+    ],
+    "enabling_raw_cleanup_does_not_restart_grace": [
+      {
+        "day": 3,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 0,
+        "reclaimable_raw": 1,
+        "generation_deleted": 0
+      },
+      {
+        "day": 4,
+        "marked_at_day": 0.0,
+        "marked_new": 0,
+        "raw_deleted": 1,
+        "reclaimable_raw": 1,
+        "generation_deleted": 1
+      }
+    ],
+    "old_mark_config_change_can_delete_same_round": {
+      "day": 8,
+      "marked_at_day": 4.0,
+      "marked_new": 0,
+      "raw_deleted": 1,
+      "reclaimable_raw": 1,
+      "generation_deleted": 1
+    },
+    "retained_rule": "current OR age <= 72 hours; older non-current descriptors deleted before raw"
+  }
+}

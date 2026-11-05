@@ -1,0 +1,6 @@
+{
+  "default_run": "passed",
+  "repo_cli_route": "passed; exact outputs equal",
+  "tampered_blob": "rejected before original source execution",
+  "note": "CLI route used a temporary two-file source fixture, not a real checkout; no source scenarios changed."
+}
