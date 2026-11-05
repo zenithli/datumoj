@@ -1,0 +1,35 @@
+{
+  "observed_at": "2026-11-05T15:57:20Z",
+  "repository": "gorou5/datumoj",
+  "pr": 100,
+  "head": "8562d05d707356f9393ba2a78dc75b98def3ab72",
+  "base": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+  "head_tree": "d06aa02107c923835c37bbb12bde087dc0759609",
+  "head_parents": [
+    "df79017598c9a0dbd9ef263c4ed51e559dcdb43c",
+    "fa9d0be8125248f5a0ceba6659789e5ff8754fe9"
+  ],
+  "ci": {
+    "run_number": 337,
+    "run_id": 42057257715,
+    "url": "https://github.com/gorou5/datumoj/actions/runs/42057257715",
+    "status": "completed",
+    "conclusion": "success",
+    "updated_at": "2026-11-05T15:53:24Z",
+    "validate": "success",
+    "test": "success",
+    "lint": "passed",
+    "checkout_candidate": "8c1d08b05569a01b79616f4690b68f8542262f44",
+    "candidate_tree": "d06aa02107c923835c37bbb12bde087dc0759609",
+    "candidate_parents": [
+      "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "8562d05d707356f9393ba2a78dc75b98def3ab72"
+    ],
+    "passed": 5347,
+    "xfailed": 1,
+    "warnings": 1,
+    "pytest_seconds": 759.48
+  },
+  "pr_state": "open",
+  "merged": false
+}

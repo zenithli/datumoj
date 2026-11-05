@@ -1,0 +1,349 @@
+{
+  "evidence_kind": "local_synthetic_integration",
+  "production_evidence": false,
+  "before": [
+    {
+      "round": "first_due",
+      "generation": 1,
+      "due": 3,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "crawl",
+          "categories": {
+            "http_error": 1
+          },
+          "consecutive_failures": 1,
+          "first_failure_at": "2026-11-03T13:46:12.076293+00:00"
+        },
+        {
+          "source_id": "jp-cloud1",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 6,
+      "embedder_attempted": 6,
+      "issue_closed": null,
+      "issue_count": 0
+    },
+    {
+      "round": "second_due",
+      "generation": 2,
+      "due": 2,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "crawl",
+          "categories": {
+            "http_error": 1
+          },
+          "consecutive_failures": 2,
+          "first_failure_at": "2026-11-03T13:46:12.076293+00:00"
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 10,
+      "embedder_attempted": 12,
+      "issue_closed": false,
+      "issue_count": 1
+    },
+    {
+      "round": "non_due_terminal",
+      "generation": 3,
+      "due": 0,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [],
+      "ledger_rows": 10,
+      "embedder_attempted": 18,
+      "issue_closed": false,
+      "issue_count": 1
+    },
+    {
+      "round": "next_due_crawl_recovers",
+      "generation": 4,
+      "due": 2,
+      "exit_status": 0,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 14,
+      "embedder_attempted": 18,
+      "issue_closed": true,
+      "issue_count": 1
+    },
+    {
+      "round": "real_vectors_recover",
+      "generation": 5,
+      "due": 3,
+      "exit_status": 0,
+      "vector_pending": 0,
+      "health": [
+        {
+          "source_id": "jp-cloud1",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud0",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 20,
+      "embedder_attempted": 24,
+      "issue_closed": true,
+      "issue_count": 1
+    }
+  ],
+  "after": [
+    {
+      "round": "first_due",
+      "generation": 1,
+      "due": 3,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "crawl",
+          "categories": {
+            "http_error": 1
+          },
+          "consecutive_failures": 1,
+          "first_failure_at": "2026-11-03T13:42:59.866599+00:00"
+        },
+        {
+          "source_id": "jp-cloud1",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 6,
+      "embedder_attempted": 6,
+      "issue_closed": null,
+      "issue_count": 0
+    },
+    {
+      "round": "second_due",
+      "generation": 2,
+      "due": 2,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "crawl",
+          "categories": {
+            "http_error": 1
+          },
+          "consecutive_failures": 2,
+          "first_failure_at": "2026-11-03T13:42:59.866599+00:00"
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 10,
+      "embedder_attempted": 12,
+      "issue_closed": false,
+      "issue_count": 1
+    },
+    {
+      "round": "non_due_terminal",
+      "generation": 3,
+      "due": 0,
+      "exit_status": 1,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 2,
+          "first_failure_at": "2026-11-03T13:42:59.866599+00:00"
+        },
+        {
+          "source_id": "jp-cloud1",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 10,
+      "embedder_attempted": 18,
+      "issue_closed": false,
+      "issue_count": 1
+    },
+    {
+      "round": "next_due_crawl_recovers",
+      "generation": 4,
+      "due": 2,
+      "exit_status": 0,
+      "vector_pending": 6,
+      "health": [
+        {
+          "source_id": "jp-cloud0",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud1",
+          "status": "failed",
+          "phase": "embedding",
+          "categories": {
+            "embedding_failed": 1
+          },
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 14,
+      "embedder_attempted": 18,
+      "issue_closed": false,
+      "issue_count": 1
+    },
+    {
+      "round": "real_vectors_recover",
+      "generation": 5,
+      "due": 3,
+      "exit_status": 0,
+      "vector_pending": 0,
+      "health": [
+        {
+          "source_id": "jp-cloud1",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud0",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        },
+        {
+          "source_id": "jp-cloud2",
+          "status": "ok",
+          "phase": null,
+          "categories": {},
+          "consecutive_failures": 0,
+          "first_failure_at": null
+        }
+      ],
+      "ledger_rows": 20,
+      "embedder_attempted": 24,
+      "issue_closed": true,
+      "issue_count": 1
+    }
+  ]
+}

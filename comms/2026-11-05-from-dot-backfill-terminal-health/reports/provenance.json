@@ -1,0 +1,234 @@
+{
+  "evidence_kind": "local_synthetic_integration",
+  "production_evidence": false,
+  "prepared_utc": "2026-11-05T16:22:57.132627+00:00",
+  "full_suite_status": "failed_two_tests_not_causally_resolved",
+  "variants": {
+    "standalone-fa9d0be": {
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "parent_tree": "59191525de0ad29c104bbd86fee8c0651dd52b0b",
+      "patch": "patches/backfill-terminal-health-standalone-fa9d0be.patch",
+      "patch_sha256": "0d264e607066dbff38002f1cd98708bbe68cc5c65bf3cbef8425196f6fcbca70",
+      "final_file_sha256": {
+        "src/datumoj/rikolto/cloud.py": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+        "docs/deploy/runners.md": "c73ea62de6272e115621efba3b8b7005b6db0eae5c1cd581a2c03683cd674374",
+        "tests/test_backfill_alert_real_path.py": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6"
+      },
+      "apply_check": true,
+      "post_apply_files_exact": true,
+      "verified_utc": "2026-11-05T16:20:52.783926+00:00"
+    },
+    "adapted-8562d05": {
+      "parent": "8562d05d707356f9393ba2a78dc75b98def3ab72",
+      "parent_tree": "d06aa02107c923835c37bbb12bde087dc0759609",
+      "patch": "patches/backfill-terminal-health-adapted-8562d05.patch",
+      "patch_sha256": "347bc5034c758de535ed9439ad88ccf4e51e861981a1e22b7dfbe9d4a4ca4eaf",
+      "final_file_sha256": {
+        "src/datumoj/rikolto/cloud.py": "238401c5d0736cb3634b26410ced975b1f9ffd8dfbb7fc6d33b98374df8296b5",
+        "docs/deploy/runners.md": "306bd30a07ddf624b37dc53dc4e9a38dccb81ea27f4e6dd27fa652b047abf121",
+        "tests/test_backfill_alert_real_path.py": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6"
+      },
+      "apply_check": true,
+      "post_apply_files_exact": true,
+      "verified_utc": "2026-11-05T16:20:53.262754+00:00"
+    }
+  },
+  "text_cleanup": [
+    {
+      "variant": "standalone",
+      "utc": "2026-11-05T16:20:17.372045+00:00",
+      "production_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "old_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "new_test_sha256": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6",
+      "test_executable_ast_unchanged": true,
+      "docs_only_removed_duplicate_blank_line": true
+    },
+    {
+      "variant": "combined",
+      "utc": "2026-11-05T16:20:17.388057+00:00",
+      "production_sha256": "238401c5d0736cb3634b26410ced975b1f9ffd8dfbb7fc6d33b98374df8296b5",
+      "old_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "new_test_sha256": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6",
+      "test_executable_ast_unchanged": true,
+      "docs_only_removed_duplicate_blank_line": true
+    }
+  ],
+  "verification_logs": [
+    {
+      "log_name": "full-suite.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "102b4b27485454dad33a1ada138a530daaa59f0b285593d90fbbd6247aaac8f3",
+      "finished_utc": "2026-11-05T16:19:26.982235+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q",
+      "result": {
+        "exit_code": 1,
+        "passed": 5340,
+        "failed": 2,
+        "xfailed": 1,
+        "warnings": 1,
+        "duration_seconds": 2125.05,
+        "started_utc": "2026-11-05T15:43:58Z"
+      }
+    },
+    {
+      "log_name": "final-contract-red.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "1795f7954bafdad8750eeef7da1540ae03fea9bb4a8e743f11d5d002957f98f1",
+      "finished_utc": "2026-11-05T15:46:34.374680+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "6dcc426597727b45f9631dd1a6904a009e5f2a295e3e6b152129a830c24f09e8",
+      "new_regression_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_backfill_alert_real_path.py -k test_contract_",
+      "result": {
+        "failed": 3,
+        "deselected": 7
+      }
+    },
+    {
+      "log_name": "review-edges.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "71873e6b22871c0f2a3303089262b51e571f1de503c1022c66692c275128f22a",
+      "finished_utc": "2026-11-05T15:43:22.511691+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_backfill_alert_real_path.py tests/test_cloud_reports.py",
+      "result": {
+        "passed": 15,
+        "duration_seconds": 26.77
+      }
+    },
+    {
+      "log_name": "final-cleanup-focused-15.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "dfc418bafd24ebb4d16b5fc2ccde78f449f7861a0f68bb59a22af782d3c5e0d8",
+      "finished_utc": "2026-11-05T16:20:39.778831+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6",
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_backfill_alert_real_path.py tests/test_cloud_reports.py",
+      "result": {
+        "passed": 15,
+        "duration_seconds": 21.35
+      }
+    },
+    {
+      "log_name": "combined-tests.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "f5e6b852e11dc6c36daad48c3e6136708538357bb69c5eb5d53e1e38f60c1e96",
+      "finished_utc": "2026-11-05T15:50:50.802636+00:00",
+      "parent": "8562d05d707356f9393ba2a78dc75b98def3ab72",
+      "cloud_py_sha256": "238401c5d0736cb3634b26410ced975b1f9ffd8dfbb7fc6d33b98374df8296b5",
+      "new_regression_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_backfill_alert_real_path.py tests/test_cloud_reports.py tests/test_cloud_run.py tests/core/test_monitor.py tests/core/test_schedule.py tests/test_source_issues.py",
+      "result": {
+        "passed": 159,
+        "warnings": 1,
+        "duration_seconds": 166.23
+      }
+    },
+    {
+      "log_name": "s3-rerun-baseline.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "5b6af0c27926dd8cda5be8713c0e3453a7a3aa2596b5f86eefbc382c5b177fff",
+      "finished_utc": "2026-11-05T15:49:53.677315+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "6dcc426597727b45f9631dd1a6904a009e5f2a295e3e6b152129a830c24f09e8",
+      "new_regression_test_sha256": null,
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q 'tests/core/test_state_s3.py::TestS3StateObjectStore::test_two_writers_only_one_wins[put_if_absent]'",
+      "result": {
+        "passed": 1
+      }
+    },
+    {
+      "log_name": "s3-rerun-patched.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "048270b3d9aacfa9a480059dc21547d6890beae337729a6102ffddb4a991f1a6",
+      "finished_utc": "2026-11-05T15:49:54.149293+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": null,
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q 'tests/core/test_state_s3.py::TestS3StateObjectStore::test_two_writers_only_one_wins[put_if_absent]'",
+      "result": {
+        "passed": 1
+      }
+    },
+    {
+      "log_name": "ollama-rerun-baseline.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "bbc41f7dbe45107b6f6318534dbf5ab3d45549bb230b7a806070897a6fe9c7d5",
+      "finished_utc": "2026-11-05T15:50:27.675721+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "6dcc426597727b45f9631dd1a6904a009e5f2a295e3e6b152129a830c24f09e8",
+      "new_regression_test_sha256": null,
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q 'tests/index/test_vector.py::test_ollama_timeout_fails_after_retries'",
+      "result": {
+        "passed": 1
+      }
+    },
+    {
+      "log_name": "ollama-rerun-patched.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "324f383d9aa30329f3edae1bc6b553366ae70cf2c7513417c9e5f5bb830fd07e",
+      "finished_utc": "2026-11-05T15:50:24.807856+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": null,
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q 'tests/index/test_vector.py::test_ollama_timeout_fails_after_retries'",
+      "result": {
+        "passed": 1
+      }
+    },
+    {
+      "log_name": "baseline-flake-probe.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "01743e73649682f6d9a7de177d324b4a4dd41bb961f624f732941cb14c5a9ff6",
+      "finished_utc": "2026-11-05T15:54:10.125288+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "6dcc426597727b45f9631dd1a6904a009e5f2a295e3e6b152129a830c24f09e8",
+      "new_regression_test_sha256": null,
+      "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_existing_flake_probe.py",
+      "result": {
+        "passed": 30,
+        "s3_repetitions": 20,
+        "ollama_repetitions": 10,
+        "duration_seconds": 17.5,
+        "diagnostic_only": true,
+        "root_cause_proven": false
+      }
+    },
+    {
+      "log_name": "final-cleanup-ruff.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "finished_utc": "2026-11-05T16:20:52.222249+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6",
+      "command": "ruff check src/datumoj/rikolto/cloud.py tests/test_backfill_alert_real_path.py",
+      "result": {
+        "exit_code": 0
+      }
+    },
+    {
+      "log_name": "schema-validation.log",
+      "raw_log_in_public_package": false,
+      "log_sha256": "93a17d9e4c1afae50c7215533c51de573f85b9d447a92ea3f61d3d9f1c7d929c",
+      "finished_utc": "2026-11-05T15:44:48.359647+00:00",
+      "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+      "cloud_py_sha256": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "new_regression_test_sha256": "c99f15850e933a6b476cba113443e9bdcf284a628402597a3696950ae86d2016",
+      "command": "python tests/validate_schemas.py",
+      "result": {
+        "validated_description_files": 18,
+        "exit_code": 0
+      }
+    }
+  ],
+  "command_format": "Reproducible commands normalized to repository-relative paths and the active Python environment; internal log/basetemp paths omitted.",
+  "subsequent_upstream_head_not_full_suite_tested": "6caf6b12a384760f11f77590ad837d7d58cb6811",
+  "upstream_writes_performed": false
+}

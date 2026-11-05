@@ -1,0 +1,30 @@
+{
+  "moto": "5.2.4",
+  "boto3": "1.43.117",
+  "botocore": "1.43.117",
+  "serial_control": [
+    {
+      "body": "writer-a",
+      "status": 200,
+      "etag": "\"268837c3ef634899a998c616d12a082b\""
+    },
+    {
+      "body": "writer-b",
+      "status": 412,
+      "code": "PreconditionFailed"
+    }
+  ],
+  "forced_interleaving": [
+    {
+      "body": "writer-a",
+      "status": 200,
+      "etag": "\"268837c3ef634899a998c616d12a082b\""
+    },
+    {
+      "body": "writer-b",
+      "status": 200,
+      "etag": "\"e3230378b393a7d6c4a0d5184b0273cd\""
+    }
+  ],
+  "final_body": "writer-b"
+}

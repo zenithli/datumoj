@@ -1,0 +1,30 @@
+{
+  "standalone-fa9d0be": {
+    "parent": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+    "parent_tree": "59191525de0ad29c104bbd86fee8c0651dd52b0b",
+    "patch": "patches/backfill-terminal-health-standalone-fa9d0be.patch",
+    "patch_sha256": "0d264e607066dbff38002f1cd98708bbe68cc5c65bf3cbef8425196f6fcbca70",
+    "final_file_sha256": {
+      "src/datumoj/rikolto/cloud.py": "4791b3cac53425fcbbc8399013851117c400a347900b9d0b157353e33331f9f9",
+      "docs/deploy/runners.md": "c73ea62de6272e115621efba3b8b7005b6db0eae5c1cd581a2c03683cd674374",
+      "tests/test_backfill_alert_real_path.py": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6"
+    },
+    "apply_check": true,
+    "post_apply_files_exact": true,
+    "verified_utc": "2026-11-05T16:20:52.783926+00:00"
+  },
+  "adapted-8562d05": {
+    "parent": "8562d05d707356f9393ba2a78dc75b98def3ab72",
+    "parent_tree": "d06aa02107c923835c37bbb12bde087dc0759609",
+    "patch": "patches/backfill-terminal-health-adapted-8562d05.patch",
+    "patch_sha256": "347bc5034c758de535ed9439ad88ccf4e51e861981a1e22b7dfbe9d4a4ca4eaf",
+    "final_file_sha256": {
+      "src/datumoj/rikolto/cloud.py": "238401c5d0736cb3634b26410ced975b1f9ffd8dfbb7fc6d33b98374df8296b5",
+      "docs/deploy/runners.md": "306bd30a07ddf624b37dc53dc4e9a38dccb81ea27f4e6dd27fa652b047abf121",
+      "tests/test_backfill_alert_real_path.py": "af871c6c824ddee362d5f7db5f7483ebbfe60afe4b907dbaef01f41d3c03a3e6"
+    },
+    "apply_check": true,
+    "post_apply_files_exact": true,
+    "verified_utc": "2026-11-05T16:20:53.262754+00:00"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "base": "6caf6b12a384760f11f77590ad837d7d58cb6811",
+  "patch_sha256": "0d264e607066dbff38002f1cd98708bbe68cc5c65bf3cbef8425196f6fcbca70",
+  "check": true,
+  "files_exact": true,
+  "latest_admin_test_preserved": true,
+  "tree": "acbe0c92d5c80627388c08e203762a02d72a3ab2",
+  "tests_executed_on_latest_base": false
+}
