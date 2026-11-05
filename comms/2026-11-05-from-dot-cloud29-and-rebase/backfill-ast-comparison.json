@@ -1,0 +1,193 @@
+{
+  "old_commit": "bdf76e79d7bd4faf8eb9b83712fa53a801580762",
+  "new_commit": "2f03e8949f219bcbc9bb637793d68fee04872f78",
+  "blobs": {
+    "old": {
+      "cloud": "ca67c7a45832e4674b2a5dbbe47de2b5c51da2d8",
+      "pipeline": "196d8aaecbb9cac11df82fd5dae43ab1b987b036",
+      "state": "6370f87a58a6e09cdb745c13f227095df698f618",
+      "issues": "9b1da5aaeb4126c331dfce9bf400751a0cd85ec8"
+    },
+    "new": {
+      "cloud": "94464407b24c75dacefc54bcf13c4137ba62b104",
+      "pipeline": "65bcef3ac26a5854457c6dbb88a2dcbe10ec5423",
+      "state": "32f50eb87abd6730e1a106e32df0ce3c24bd86dc",
+      "issues": "9b1da5aaeb4126c331dfce9bf400751a0cd85ec8"
+    }
+  },
+  "target_functions": [
+    {
+      "file": "cloud",
+      "function": "_source",
+      "ast_identical": true,
+      "old_lines": [
+        133,
+        224
+      ],
+      "new_lines": [
+        146,
+        237
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_backfill",
+      "ast_identical": true,
+      "old_lines": [
+        324,
+        378
+      ],
+      "new_lines": [
+        337,
+        391
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_source_health",
+      "ast_identical": true,
+      "old_lines": [
+        266,
+        303
+      ],
+      "new_lines": [
+        279,
+        316
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_final_runs",
+      "ast_identical": true,
+      "old_lines": [
+        243,
+        251
+      ],
+      "new_lines": [
+        256,
+        264
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_failure_streak",
+      "ast_identical": true,
+      "old_lines": [
+        254,
+        263
+      ],
+      "new_lines": [
+        267,
+        276
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_failure_counts",
+      "ast_identical": true,
+      "old_lines": [
+        306,
+        307
+      ],
+      "new_lines": [
+        319,
+        320
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_embedding_counts",
+      "ast_identical": true,
+      "old_lines": [
+        310,
+        321
+      ],
+      "new_lines": [
+        323,
+        334
+      ]
+    },
+    {
+      "file": "cloud",
+      "function": "_health_failure",
+      "ast_identical": true,
+      "old_lines": [
+        237,
+        240
+      ],
+      "new_lines": [
+        250,
+        253
+      ]
+    },
+    {
+      "file": "issues",
+      "function": "issue_text",
+      "ast_identical": true,
+      "old_lines": [
+        20,
+        49
+      ],
+      "new_lines": [
+        20,
+        49
+      ]
+    },
+    {
+      "file": "issues",
+      "function": "sync_issues",
+      "ast_identical": true,
+      "old_lines": [
+        68,
+        113
+      ],
+      "new_lines": [
+        68,
+        113
+      ]
+    },
+    {
+      "file": "state",
+      "function": "_last_runs",
+      "ast_identical": true,
+      "old_lines": [
+        266,
+        278
+      ],
+      "new_lines": [
+        272,
+        284
+      ]
+    }
+  ],
+  "changed_top_level_definitions": {
+    "cloud": [
+      "_round",
+      "_safe_timings"
+    ],
+    "pipeline": [
+      "PipelineDeps",
+      "_begin_vector_batch",
+      "_finish_vector_batch",
+      "_mark_vector_missing",
+      "_parse_pending",
+      "_retry_vectors",
+      "_write_vector_document",
+      "parse_pending"
+    ],
+    "state": [
+      "StateManager",
+      "_CleanupTimeout"
+    ],
+    "issues": []
+  },
+  "retry_vectors": {
+    "whole_function_ast_identical": false,
+    "terminal_skip_condition_ast_identical": true,
+    "terminal_skip_condition": "item.get('failures', 0) >= VECTOR_FAILURE_LIMIT or item.get('snapshot_id') in staged or (exclude is not None and key in exclude)",
+    "new_lines": [
+      334,
+      369
+    ]
+  }
+}

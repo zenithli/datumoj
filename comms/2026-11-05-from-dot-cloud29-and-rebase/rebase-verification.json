@@ -1,0 +1,18 @@
+{
+  "base": "2f03e8949f219bcbc9bb637793d68fee04872f78",
+  "files": 6,
+  "insertions": 265,
+  "deletions": 9,
+  "original_payload_identical": true,
+  "syntax_valid": true,
+  "new_base_test_functions_preserved": 56,
+  "pr100_added_tests_preserved": [
+    "test_cloud_round_migrates_legacy_never_run_control",
+    "test_never_run_sources_age_across_fresh_cloud_generations",
+    "test_reenabled_source_is_not_missing_until_new_grace_period_expires"
+  ],
+  "sha256": "15d8deb53f8880e874e6707a704f84d10cc7200be1da8dce5fe5f37f2567261c",
+  "pytest": "not run: package unavailable; no full checkout/dependencies",
+  "git_apply_check": "passed on untouched exact target files",
+  "git_diff_check": "passed"
+}

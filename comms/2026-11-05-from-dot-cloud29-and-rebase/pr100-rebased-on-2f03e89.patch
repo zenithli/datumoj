@@ -1,0 +1,432 @@
+diff --git a/docs/deploy/runners.md b/docs/deploy/runners.md
+index a27246f6c7e910ac47abe334b3520abb9f9001df..8ca148d6f31f87b3694d902fff925c1f4efffe59 100644
+--- a/docs/deploy/runners.md
++++ b/docs/deploy/runners.md
+@@ -44,6 +44,12 @@ S3 上的 cloud run 用 8 个线程传输不可变副本与 raw，代次清单
+ `status` / `phase` 为 `missing` / `schedule`；若该来源上一次运行失败，`phase` 和类别取那次的
+ 阶段和失败计数。补抓中的来源会超过调度周期但仍在轮转，所以距上一次开始运行（从没运行过的
+ 按告警起算时间）不足 24 小时不算缺跑。
++`control.json` 的每个有效开启来源保存 `enabled_since`（带时区的 ISO 时间），
++随状态代次保存和恢复；从未运行过的来源按这个时间起算，不随新代次重置。
++重复开启不重置时间；来源开关或总开关关闭后再开启，重新计算宽限期，旧运行仍保留在账本中。
++旧版开关文件在下一次抓取轮次发布前补齐：已有运行记录时采用最早已知尝试时间，
++没有记录时从首次观察到有效开启时起算，不推测更早的启用时间，也不伪造运行记录。
++旧版只读副本在拉取新版状态前保留原有回退规则；状态查询本身不会写入开关文件。
+ 连续失败按账本最终记录的开始时间倒序计数，忽略开始记录和重复的最终记录；
+ 成功或无失败的 deadline 都停止计数，deadline 本身不算失败，也不作为恢复成功。
+ 
+diff --git a/src/datumoj/rikolto/cloud.py b/src/datumoj/rikolto/cloud.py
+index 94464407b24c75dacefc54bcf13c4137ba62b104..5a5398d27e1f63c3e06139202096577785f2d4ed 100644
+--- a/src/datumoj/rikolto/cloud.py
++++ b/src/datumoj/rikolto/cloud.py
+@@ -284,12 +284,15 @@ def _source_health(scheduler, current, generation=None):
+     history = scheduler._read_history()[0]
+     health = {row["source_id"]: dict(row) for row in current}
+     if generation is not None:
+-        enabled = {row["source_id"] for row in scheduler.status()["sources"] if row["effective_enabled"]}
++        source_status = scheduler.status()["sources"]
++        enabled = {row["source_id"] for row in source_status if row["effective_enabled"]}
++        enabled_since = {row["source_id"]: row["enabled_since"] for row in source_status if row.get("enabled_since")}
+         successes = {key: {"finished_at": run.finished_at.isoformat()}
+                      for key, run in generation.last_successful_runs.items()}
+         alerts = evaluate_cloud_alerts(
+             scheduler.sources.values(), enabled, successes, generation.created_at, utcnow(),
+             generation=generation.generation, first_attempts=_ledger_first_attempts(history),
++            enabled_since=enabled_since,
+         )
+         for alert in alerts:
+             if alert.rule != "cloud_run_missing":
+@@ -300,6 +303,8 @@ def _source_health(scheduler, current, generation=None):
+             # Backlogged sources overrun their schedule while still getting turns;
+             # only a source without an attempt for this long is really missing.
+             last = datetime.fromisoformat(runs[0]["started_at"]) if runs else alert.since
++            if alert.source_id in enabled_since:
++                last = max(last, datetime.fromisoformat(enabled_since[alert.source_id]))
+             if utcnow() - last < _MISSING_AFTER:
+                 continue
+             row = health.setdefault(alert.source_id, {
+@@ -430,6 +435,8 @@ def publish_previous_week_report(store, deps, now: datetime, generation=None) ->
+                 deps.registry.all(), enabled, last_successful,
+                 generation.created_at, report_at, generation=generation.generation,
+                 first_attempts=first_attempts,
++                enabled_since={row["source_id"]: row["enabled_since"] for row in status["sources"]
++                               if row.get("enabled_since")},
+             ))
+         content = weekly_report(deps, start, end, alerts)
+         try:
+@@ -553,9 +560,11 @@ def _round(*, work_dir, max_embed, max_minutes, reserve_minutes, embed_only, no_
+                         if not (root / "control.json").exists():
+                             write_control(root, {"enabled": True, "sources": {
+                                 spec.id: {"enabled": True} for spec in deps.registry.all()
+-                            }})
++                            }}, now=utcnow())
+                         phase = "due"
+                         scheduler = Scheduler(root, deps.registry.all(), lambda spec: None)
++                        if hasattr(scheduler, "observe_enabled"):
++                            scheduler.observe_enabled()
+                         due = _due(scheduler, root)
+                         result["due"] = len(due)
+                         remaining = max_embed
+diff --git a/src/datumoj/rikolto/core/monitor.py b/src/datumoj/rikolto/core/monitor.py
+index ab9c0d64bc18731825b4c77b97ca4fdfc20f9010..37ecc633bf681259b94233a870fa21afccdb489c 100644
+--- a/src/datumoj/rikolto/core/monitor.py
++++ b/src/datumoj/rikolto/core/monitor.py
+@@ -175,6 +175,7 @@ def evaluate_cloud_alerts(
+     *,
+     generation: int | None = None,
+     first_attempts: Mapping[str, str] | None = None,
++    enabled_since: Mapping[str, str] | None = None,
+ ) -> list[Alert]:
+     """Alert on missed cloud source cycles and a stalled generation pointer."""
+     if generation_created_at.utcoffset() is None or now.utcoffset() is None:
+@@ -189,9 +190,12 @@ def evaluate_cloud_alerts(
+     alerts: list[Alert] = []
+     for spec, interval in scheduled:
+         run = last_successful_runs.get(spec.id)
+-        anchor = _aware_datetime(run.get("finished_at")) if run is not None else None
++        last_success = _aware_datetime(run.get("finished_at")) if run is not None else None
+         first_attempt = _aware_datetime(first_attempts.get(spec.id)) if first_attempts else None
+-        anchor = anchor or first_attempt or generation_created_at
++        enabled_at = _aware_datetime(enabled_since.get(spec.id)) if enabled_since else None
++        anchor = last_success or first_attempt or enabled_at or generation_created_at
++        if enabled_at is not None:
++            anchor = max(anchor, enabled_at)
+         if now - anchor > interval:
+             alerts.append(Alert(
+                 source_id=spec.id,
+@@ -202,7 +206,8 @@ def evaluate_cloud_alerts(
+                 details={
+                     "schedule": spec.schedule or "",
+                     "expected_after_seconds": int(interval.total_seconds()),
+-                    "last_success_at": anchor.isoformat() if run is not None else None,
++                    "last_success_at": last_success.isoformat() if last_success is not None else None,
++                    "enabled_since": enabled_at.isoformat() if enabled_at else None,
+                     "first_attempt_at": first_attempt.isoformat() if run is None and first_attempt else None,
+                     "generation": generation,
+                 },
+@@ -275,6 +280,8 @@ def attach_cloud_status(
+         alerts = evaluate_cloud_alerts(
+             sources, enabled_sources, last_successful, created_at, now, generation=generation,
+             first_attempts=first_attempts,
++            enabled_since={row["source_id"]: row["enabled_since"] for row in status.get("sources", [])
++                           if row.get("enabled_since")},
+         )
+     source_rows = {row["source_id"]: row for row in status.get("sources", [])}
+     global_alerts = []
+diff --git a/src/datumoj/rikolto/core/schedule.py b/src/datumoj/rikolto/core/schedule.py
+index 130344254bf6002491d6fabe4bf8ce9d8e46ac71..fa66346ed56752a6508304c4a22c5619a3e14713 100644
+--- a/src/datumoj/rikolto/core/schedule.py
++++ b/src/datumoj/rikolto/core/schedule.py
+@@ -21,7 +21,7 @@ from typing import Any
+ from datumoj.rikolto.core.contracts import Manifest, SourceSpec
+ from datumoj.rikolto.core.errors import safe_reason
+ from datumoj.rikolto.core.lease import LeaseManager, remote_configured
+-from datumoj.rikolto.core.monitor import evaluate_alerts
++from datumoj.rikolto.core.monitor import _aware_datetime, _ledger_first_attempts, evaluate_alerts
+ 
+ try:
+     import fcntl
+@@ -74,6 +74,8 @@ def _validate_control(value: Any) -> dict[str, Any]:
+     for source_id, state in sources.items():
+         if not isinstance(state, dict) or type(state.get("enabled", False)) is not bool:
+             raise ValueError(f"sources.{source_id}.enabled 必须是布尔值")
++        if "enabled_since" in state and _aware_datetime(state["enabled_since"]) is None:
++            raise ValueError(f"sources.{source_id}.enabled_since 必须是带时区的 ISO 日期时间")
+     return {"enabled": value.get("enabled", False), "sources": sources}
+ 
+ 
+@@ -170,18 +172,47 @@ def workspace_lock(data_dir: str | Path) -> Iterator[None]:
+             held.remove(lock_key)
+ 
+ 
+-def write_control(data_dir: str | Path, control: dict[str, Any]) -> None:
++def _track_enablement(control, previous, now, first_attempts=None):
++    if now.utcoffset() is None:
++        raise ValueError("开关时间必须带时区")
++    sources = {}
++    for source_id, value in control["sources"].items():
++        state = dict(value)
++        old = previous["sources"].get(source_id, {})
++        if control["enabled"] and state.get("enabled", False):
++            # An idempotent write must not move the clock. Legacy controls use
++            # their oldest known attempt, or the first observation if never run.
++            since = now.isoformat()
++            if previous["enabled"] and old.get("enabled", False):
++                since = old.get("enabled_since")
++                if since is None and first_attempts is not None:
++                    since = first_attempts.get(source_id) or now.isoformat()
++            if since is not None:
++                state["enabled_since"] = since
++            else:
++                # Preserve legacy uncertainty until observe_enabled can consult
++                # the ledger, rather than resetting it on unrelated toggles.
++                state.pop("enabled_since", None)
++        else:
++            state.pop("enabled_since", None)
++        sources[source_id] = state
++    return {"enabled": control["enabled"], "sources": sources}
++
++
++def write_control(data_dir: str | Path, control: dict[str, Any], *, now: datetime | None = None) -> None:
+     """原子替换完整开关；增量更新请用 set_enabled，避免读改写竞争。"""
+     checked = _validate_control(control)
+     root = Path(data_dir)
+     with workspace_lock(root):
+         ensure_writable(root)
+         with _locked(root / "control.lock"):
++            checked = _track_enablement(checked, read_control(root), now or utcnow())
+             _atomic_write(root / "control.json", json.dumps(checked, ensure_ascii=False).encode())
+ 
+ 
+ def set_enabled(
+     data_dir: str | Path, enabled: bool, source_ids: Iterable[str] | None = None,
++    *, now: datetime | None = None,
+ ) -> dict[str, Any]:
+     """source_ids=None 更新总开关，否则仅更新指定来源，不改总开关。"""
+     if type(enabled) is not bool:
+@@ -190,12 +221,14 @@ def set_enabled(
+     with workspace_lock(root):
+         ensure_writable(root)
+         with _locked(root / "control.lock"):
+-            control = read_control(root)
++            previous = read_control(root)
++            control = {"enabled": previous["enabled"], "sources": dict(previous["sources"])}
+             if source_ids is None:
+                 control["enabled"] = enabled
+             else:
+                 for source_id in source_ids:
+-                    control["sources"][source_id] = {"enabled": enabled}
++                    control["sources"][source_id] = {**control["sources"].get(source_id, {}), "enabled": enabled}
++            control = _track_enablement(control, previous, now or utcnow())
+             _atomic_write(root / "control.json", json.dumps(control, ensure_ascii=False).encode())
+         return control
+ 
+@@ -351,6 +384,18 @@ class Scheduler:
+         return next((row for row in reversed(history) if row["source_id"] == source_id
+                      and row.get("reason_code") != "write_lease_unavailable"), None)
+ 
++    def observe_enabled(self) -> None:
++        """Persist missing legacy clocks before a cloud round publishes state."""
++        with workspace_lock(self.data_dir):
++            ensure_writable(self.data_dir)
++            with _locked(self.data_dir / "control.lock"):
++                control = read_control(self.data_dir)
++                updated = _track_enablement(
++                    control, control, self.now(), _ledger_first_attempts(self._history()),
++                )
++                if updated != control:
++                    _atomic_write(self.data_dir / "control.json", json.dumps(updated, ensure_ascii=False).encode())
++
+     def due(self) -> list[str]:
+         """Enabled, due source IDs using the same ledger and next_due as tick."""
+         control = read_control(self.data_dir)
+@@ -394,6 +439,7 @@ class Scheduler:
+             rows.append({
+                 "source_id": spec.id, "enabled": enabled,
+                 "effective_enabled": effective_enabled,
++                "enabled_since": control["sources"].get(spec.id, {}).get("enabled_since"),
+                 "schedule": spec.schedule, "last_run": last,
+                 "next_due": due.isoformat() if due else None, "running": running, "alerts": alerts,
+             })
+diff --git a/tests/core/test_schedule_enablement.py b/tests/core/test_schedule_enablement.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..8c27544b8241c1095e66b161fe878da88b251245
+--- /dev/null
++++ b/tests/core/test_schedule_enablement.py
+@@ -0,0 +1,107 @@
++"""Durable enablement clocks, independent of runs and generation publication."""
++
++import json
++from datetime import timedelta
++
++import pytest
++
++from datumoj.rikolto.core.monitor import attach_cloud_status, evaluate_cloud_alerts
++from datumoj.rikolto.core.schedule import Scheduler, read_control, set_enabled, write_control
++from datumoj.rikolto.testing.samples import T0, make_spec
++
++
++def test_switches_preserve_clock_until_effectively_disabled(tmp_path):
++    source = "jp-clock"
++    set_enabled(tmp_path, True, [source], now=T0)
++    assert "enabled_since" not in read_control(tmp_path)["sources"][source]
++    set_enabled(tmp_path, True, now=T0)
++    set_enabled(tmp_path, True, [source], now=T0 + timedelta(hours=2))
++    write_control(tmp_path, {"enabled": True, "sources": {source: {"enabled": True}}},
++                  now=T0 + timedelta(hours=3))
++    assert read_control(tmp_path)["sources"][source]["enabled_since"] == T0.isoformat()
++    for targets in ([source], None):
++        set_enabled(tmp_path, False, targets, now=T0 + timedelta(days=1))
++        assert "enabled_since" not in read_control(tmp_path)["sources"][source]
++        set_enabled(tmp_path, True, targets, now=T0 + timedelta(days=2))
++        assert read_control(tmp_path)["sources"][source]["enabled_since"] == (T0 + timedelta(days=2)).isoformat()
++    assert not (tmp_path / "runs.jsonl").exists()
++
++
++def test_observe_legacy_control_once_without_inventing_runs(tmp_path):
++    specs = [make_spec("jp-new", schedule="hourly"), make_spec("jp-old", schedule="hourly")]
++    (tmp_path / "control.json").write_text(json.dumps({
++        "enabled": True, "sources": {spec.id: {"enabled": True} for spec in specs},
++    }))
++    scheduler = Scheduler(tmp_path, specs, lambda _: None, now=lambda: T0)
++    scheduler.append_run({"source_id": "jp-old", "started_at": (T0 - timedelta(days=3)).isoformat(),
++                          "status": "failed", "exit_status": 1})
++    ledger = (tmp_path / "runs.jsonl").read_bytes()
++    scheduler.observe_enabled()
++    state = read_control(tmp_path)["sources"]
++    assert state["jp-new"]["enabled_since"] == T0.isoformat()
++    assert state["jp-old"]["enabled_since"] == (T0 - timedelta(days=3)).isoformat()
++    scheduler.now = lambda: T0 + timedelta(days=4)
++    scheduler.observe_enabled()
++    assert read_control(tmp_path)["sources"] == state
++    assert (tmp_path / "runs.jsonl").read_bytes() == ledger
++
++
++@pytest.mark.parametrize("stamp", ["not-a-date", "2026-10-20T00:00:00", 123, None])
++def test_invalid_enablement_clock_is_rejected(tmp_path, stamp):
++    (tmp_path / "control.json").write_text(json.dumps({
++        "enabled": True, "sources": {"jp-clock": {"enabled": True, "enabled_since": stamp}},
++    }))
++    with pytest.raises(ValueError, match="enabled_since"):
++        read_control(tmp_path)
++
++
++def test_reenabled_source_gets_grace_period_despite_old_success_or_attempt():
++    spec = make_spec("jp-clock", schedule="hourly")
++    old = (T0 - timedelta(days=3)).isoformat()
++    for successes in ({}, {spec.id: {"run_id": "old", "finished_at": old}}):
++        assert evaluate_cloud_alerts(
++            [spec], {spec.id}, successes, T0, T0 + timedelta(hours=1),
++            first_attempts={spec.id: old}, enabled_since={spec.id: T0.isoformat()},
++        ) == []
++        [alert] = evaluate_cloud_alerts(
++            [spec], {spec.id}, successes, T0 + timedelta(hours=1), T0 + timedelta(hours=2),
++            first_attempts={spec.id: old}, enabled_since={spec.id: T0.isoformat()},
++        )
++        assert alert.since == T0
++        assert alert.details["last_success_at"] == (old if successes else None)
++        assert alert.details["enabled_since"] == T0.isoformat()
++
++
++def test_readonly_replica_uses_enablement_clock_without_changing_control(tmp_path):
++    spec = make_spec("jp-clock", schedule="hourly")
++    write_control(tmp_path, {"enabled": True, "sources": {spec.id: {"enabled": True}}}, now=T0)
++    control = (tmp_path / "control.json").read_bytes()
++    current = T0 + timedelta(days=2)
++    (tmp_path / "state-pull.json").write_text(json.dumps({
++        "generation": 73, "created_at": current.isoformat(), "pulled_at": current.isoformat(),
++        "writer": {"kind": "nas"}, "last_successful_runs": {},
++    }))
++    scheduler = Scheduler(tmp_path, [spec], lambda _: None, now=lambda: current)
++    status = attach_cloud_status(scheduler.status(), tmp_path, [spec], [], current)
++    [alert] = status["sources"][0]["alerts"]
++    assert alert["rule"] == "cloud_run_missing" and alert["since"] == T0.isoformat()
++    assert (tmp_path / "control.json").read_bytes() == control
++    assert not (tmp_path / "runs.jsonl").exists()
++
++
++@pytest.mark.parametrize("operation", ["source", "master", "other", "replace"])
++def test_legacy_clock_is_not_reset_by_idempotent_or_unrelated_writes(tmp_path, operation):
++    spec = make_spec("jp-legacy", schedule="hourly")
++    control = {"enabled": True, "sources": {spec.id: {"enabled": True}}}
++    (tmp_path / "control.json").write_text(json.dumps(control))
++    scheduler = Scheduler(tmp_path, [spec], lambda _: None, now=lambda: T0)
++    oldest = T0 - timedelta(days=3)
++    scheduler.append_run({"source_id": spec.id, "started_at": oldest.isoformat(),
++                          "status": "failed", "exit_status": 1})
++    if operation == "replace":
++        write_control(tmp_path, control, now=T0)
++    else:
++        targets = {"source": [spec.id], "master": None, "other": ["jp-other"]}[operation]
++        set_enabled(tmp_path, True, targets, now=T0)
++    scheduler.observe_enabled()
++    assert read_control(tmp_path)["sources"][spec.id]["enabled_since"] == oldest.isoformat()
+diff --git a/tests/test_cloud_run.py b/tests/test_cloud_run.py
+index 4c1ca9f476eb6b290a52cbcf346db52f32c36f12..d235d930c30e14f8e879b24c3f942dacf3c51253 100644
+--- a/tests/test_cloud_run.py
++++ b/tests/test_cloud_run.py
+@@ -1200,3 +1200,84 @@ def test_post_publish_verification_failure_skips_cleanup(world, monkeypatch):
+     assert result["status"] == "failed" and result["reason"] == "publish_failed"
+     assert result["generation"] is None
+     released(world)
++
++
++def test_never_run_sources_age_across_fresh_cloud_generations(world, monkeypatch):
++    # Only the clock and external services are controlled: scheduler, alerts,
++    # control persistence and generation publication/restore all run for real.
++    from datumoj.rikolto.core import state
++
++    class Clock(datetime):
++        @classmethod
++        def now(cls, tz=None):
++            return world.clock[0].astimezone(tz)
++
++    monkeypatch.setattr(state, "datetime", Clock)
++    started = world.clock[0]
++    for hour in (0, 2, 23, 24, 25, 73):
++        world.clock[0] = started + timedelta(hours=hour)
++        result, root = invoke(world, f"never-run-{hour}", "--max-minutes", "0")
++        assert result["status"] == "completed"
++        assert result["sources"] == [] and not (root / "runs.jsonl").exists()
++        if hour < 24:
++            assert result["source_health"] == []
++        else:
++            expected = {"jp-cloud0", "jp-cloud2"} if hour == 24 else {"jp-cloud0", "jp-cloud1", "jp-cloud2"}
++            assert {row["source_id"] for row in result["source_health"]} == expected
++            assert all(row["status"] == "missing" for row in result["source_health"])
++        generation = world.managers[-1].list()[0]
++        assert generation.created_at == world.clock[0] and generation.last_successful_runs == {}
++        assert {row["enabled_since"] for row in schedule.read_control(root)["sources"].values()} == {
++            started.isoformat(),
++        }
++
++
++def test_reenabled_source_is_not_missing_until_new_grace_period_expires(tmp_path, monkeypatch):
++    spec = make_spec("jp-reenabled", schedule="hourly")
++    started = datetime(2026, 10, 20, tzinfo=UTC)
++    clock = [started]
++    monkeypatch.setattr(cloud, "utcnow", lambda: clock[0])
++    scheduler = schedule.Scheduler(tmp_path, [spec], lambda _: None, now=lambda: clock[0])
++    schedule.write_control(tmp_path, {"enabled": True, "sources": {spec.id: {"enabled": True}}}, now=started)
++    scheduler.append_run({"source_id": spec.id, "started_at": started.isoformat(),
++                          "status": "failed", "exit_status": 1, "failures": {"crawl_failed": 1}})
++    schedule.set_enabled(tmp_path, False, [spec.id], now=started + timedelta(days=1))
++    reenabled = started + timedelta(days=2)
++    schedule.set_enabled(tmp_path, True, [spec.id], now=reenabled)
++    for hours in (0, 2, 23, 24):
++        clock[0] = reenabled + timedelta(hours=hours)
++        generation = SimpleNamespace(last_successful_runs={}, created_at=clock[0], generation=hours + 1)
++        health = cloud._source_health(scheduler, [], generation)
++        if hours < 24:
++            assert health == []
++        else:
++            assert health[0]["status"] == "missing"
++
++
++def test_cloud_round_migrates_legacy_never_run_control(world, monkeypatch):
++    from datumoj.rikolto.core import state
++
++    class Clock(datetime):
++        @classmethod
++        def now(cls, tz=None):
++            return world.clock[0].astimezone(tz)
++
++    monkeypatch.setattr(state, "datetime", Clock)
++    _, root = invoke(world, "legacy-seed", "--max-minutes", "0")
++    # Publish a legacy control file without any historical run or enable time.
++    (root / "control.json").write_text(json.dumps({
++        "enabled": True, "sources": {spec.id: {"enabled": True} for spec in world.specs},
++    }))
++    StateManager(remote(world), root).push()
++    world.clock[0] += timedelta(days=3)
++    observed = world.clock[0]
++    first, root = invoke(world, "legacy-first-observation", "--max-minutes", "0")
++    assert first["source_health"] == []
++    assert {row["enabled_since"] for row in schedule.read_control(root)["sources"].values()} == {
++        observed.isoformat(),
++    }
++    world.clock[0] += timedelta(hours=25)
++    later, root = invoke(world, "legacy-later", "--max-minutes", "0")
++    assert {row["source_id"] for row in later["source_health"]} == {spec.id for spec in world.specs}
++    assert all(row["status"] == "missing" for row in later["source_health"])
++    assert not (root / "runs.jsonl").exists()
