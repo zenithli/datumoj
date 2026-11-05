@@ -1,0 +1,109 @@
+{
+  "evidence_kind": "public_workflow_log_summary",
+  "run_url": "https://github.com/gorou5/datumoj/actions/runs/42058432436",
+  "job_url": "https://github.com/gorou5/datumoj/actions/runs/42058432436/job/127353146513",
+  "head": "fa9d0be8125248f5a0ceba6659789e5ff8754fe9",
+  "run_number": 31,
+  "generation": 28,
+  "status": "failed",
+  "reason": "source_failed",
+  "exit_status": 1,
+  "due": 8,
+  "sources_run": 5,
+  "new": 613,
+  "unchanged": 1,
+  "parsed": 613,
+  "budget_exhausted": true,
+  "source_health": [
+    {
+      "source_id": "us-fedreg",
+      "status": "failed",
+      "phase": "crawl",
+      "categories": {
+        "other": 1
+      },
+      "consecutive_failures": 3,
+      "first_failure_at": "2026-11-03T13:58:09.083450+00:00"
+    },
+    {
+      "source_id": "eu-eurostat",
+      "status": "failed",
+      "phase": "crawl",
+      "categories": {
+        "http_error": 3
+      },
+      "consecutive_failures": 4,
+      "first_failure_at": "2026-11-01T15:59:51.865057+00:00"
+    },
+    {
+      "source_id": "fr-data-gouv",
+      "status": "ok",
+      "phase": null,
+      "categories": {},
+      "consecutive_failures": 0,
+      "first_failure_at": null
+    },
+    {
+      "source_id": "jp-jma",
+      "status": "failed",
+      "phase": "parse_index",
+      "categories": {
+        "BudgetExceeded": 1
+      },
+      "consecutive_failures": 12,
+      "first_failure_at": "2026-11-04T04:13:24.445332+00:00"
+    },
+    {
+      "source_id": "jp-egov-data",
+      "status": "failed",
+      "phase": "crawl",
+      "categories": {
+        "http_error": 45,
+        "blocked_by_robots": 1,
+        "empty_body": 4,
+        "BudgetExceeded": 1
+      },
+      "consecutive_failures": 5,
+      "first_failure_at": "2026-11-04T02:26:16.945697+00:00"
+    }
+  ],
+  "embedding_deferred": 0,
+  "backfill_embedded": 0,
+  "vector_pending": 0,
+  "publish_seconds": 180.98475857099993,
+  "restore_seconds": 161.82085032499998,
+  "downloaded_bytes": 0,
+  "reused_bytes": 1738320961,
+  "restore_cache_run_id": 42003273693,
+  "cleanup": {
+    "enabled": true,
+    "raw_enabled": true,
+    "generations_deleted": 3,
+    "copies_deleted": 2580,
+    "copies_deleted_bytes": 189511849,
+    "raw_marked": 491,
+    "raw_deleted": 0,
+    "raw_deleted_bytes": 0,
+    "reclaimable_generations": 3,
+    "reclaimable_copies": 2580,
+    "reclaimable_copies_bytes": 189511849,
+    "reclaimable_raw": 0,
+    "reclaimable_raw_bytes": 0,
+    "total_bytes": 7181762604,
+    "over_7gb": true,
+    "failures": 0,
+    "elapsed_s": 82.107,
+    "timed_out": false
+  },
+  "prior_cleanup": {
+    "run": 30,
+    "total_bytes": 6975744804,
+    "elapsed_s": 549.363,
+    "copies_deleted": 731,
+    "copies_deleted_bytes": 12752504,
+    "raw_deleted": 0
+  },
+  "delta_reported_namespace_bytes": 206017800,
+  "total_bytes_semantics": "Initial configured-namespace inventory minus service-confirmed deletions. Not a fresh post-cleanup listing or account-wide R2 total.",
+  "account_wide_capacity_verified": false
+}
