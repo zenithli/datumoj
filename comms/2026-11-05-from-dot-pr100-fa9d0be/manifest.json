@@ -1,0 +1,57 @@
+{
+  "commit": "8562d05d707356f9393ba2a78dc75b98def3ab72",
+  "tree": "d06aa02107c923835c37bbb12bde087dc0759609",
+  "parents": [
+    "df79017598c9a0dbd9ef263c4ed51e559dcdb43c",
+    "fa9d0be8125248f5a0ceba6659789e5ff8754fe9"
+  ],
+  "bundle_sha256": "1cf5d91aabdf662bf06fa266789618e62b073d7499387dbe16b80f60cffb3dcd",
+  "bundle_bytes": 2128,
+  "base64_bytes": 2878,
+  "bundle_objects": 12,
+  "required_delta_bases": [
+    "797167b0b9bec7e4b73867a0adff0c1cbaa85c52",
+    "81a7947790ee5c7e5a967919adf897dca8ca9ba0",
+    "99bca0abd7a4d7ea27ffe181d6de937caba9288b",
+    "45c5195d55b61dab0348ffc98951b8af9ab8a0ba",
+    "3532f8d2f3f1433effdd29d1e31ee0706a2016c7",
+    "f2d9eca3f7a5955d10e367318febbdf2c0c2c0a1",
+    "4a99730e8e494016f23babe252521cbd444d73a5",
+    "2841115b7e0e9bb5a93f7a137a1bbd5ab24c1ee6",
+    "d235d930c30e14f8e879b24c3f942dacf3c51253"
+  ],
+  "offline_import": "passed",
+  "pack_checksum": "passed",
+  "repository": "gorou5/datumoj",
+  "pull_request": 100,
+  "target_branch": "fix/source-monitor-enabled-since",
+  "bundle_ref": "refs/heads/dot/pr100-sync-fa9d0be-20261105",
+  "bundle_file": "pr100-sync-fa9d0be.bundle",
+  "new_commits": 1,
+  "source_patch_sha256": "15d8deb53f8880e874e6707a704f84d10cc7200be1da8dce5fe5f37f2567261c",
+  "stable_patch_id": "4caa46e2a7c423a12857e433d6789ea909788485",
+  "clean_merge": true,
+  "merge_equals_base_plus_original_patch": true,
+  "checks": {
+    "baseline_cleanup_s3": {
+      "passed": 149,
+      "seconds": 118.19
+    },
+    "combined": {
+      "selected_files": 28,
+      "total": 569,
+      "passed": 568,
+      "xfailed": 1,
+      "warnings": 1,
+      "seconds": 999.49,
+      "exit_code": 0
+    },
+    "ruff": "passed",
+    "schema_descriptions_passed": 18,
+    "diff_check": "passed",
+    "full_combined_pytest": "not run",
+    "new_commit_github_ci": "not run",
+    "production": "not tested"
+  },
+  "remote_writes": "none"
+}
