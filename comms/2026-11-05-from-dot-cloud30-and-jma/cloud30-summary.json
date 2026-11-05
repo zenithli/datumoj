@@ -1,0 +1,115 @@
+{
+  "checked_at": "2026-11-05T11:07:00Z",
+  "run": {
+    "number": 30,
+    "id": 42003273693,
+    "url": "https://github.com/gorou5/datumoj/actions/runs/42003273693",
+    "head_sha": "e602697f925e4d7f98cb01d4d5b42389ca39b68c"
+  },
+  "status": "failed",
+  "reason": "source_failed",
+  "generation": 27,
+  "new": 564,
+  "parsed": 897,
+  "due": 5,
+  "budget_exhausted": true,
+  "source_health": [
+    {
+      "source_id": "jp-jma",
+      "status": "failed",
+      "phase": "parse_index",
+      "categories": {
+        "BudgetExceeded": 1
+      },
+      "consecutive_failures": 11,
+      "first_failure_at": "2026-11-04T04:13:24.445332+00:00"
+    },
+    {
+      "source_id": "jp-bodik",
+      "status": "failed",
+      "phase": "crawl",
+      "categories": {
+        "http_error": 2,
+        "other": 7
+      },
+      "consecutive_failures": 7,
+      "first_failure_at": "2026-11-01T16:00:27.931884+00:00"
+    }
+  ],
+  "source_counts": [
+    {
+      "source_id": "jp-jma",
+      "new": 538,
+      "unchanged": 0,
+      "parsed": 538,
+      "failures": {
+        "parse_index_failed": 1
+      },
+      "stop_reason": "deadline"
+    },
+    {
+      "source_id": "jp-bodik",
+      "new": 26,
+      "unchanged": 334,
+      "parsed": 359,
+      "failures": {
+        "crawl_failed": 2,
+        "parse_index_failed": 7
+      },
+      "stop_reason": "deadline"
+    }
+  ],
+  "restore_timings": {
+    "downloaded_bytes": 0,
+    "reused_bytes": 1706948353,
+    "download_copies": 1.6991091750000038,
+    "validate": 175.06446589299998,
+    "download_raw": 18.87361886499997,
+    "sample_provenance": 4.921836226999972,
+    "cleanup": 0.0000768730000118012,
+    "total": 212.087841985
+  },
+  "publish_timings": {
+    "prepare": 36.17255810000006,
+    "stage": 20.704467351999938,
+    "validate": 0.05570181099983529,
+    "upload_copies": 75.311400563,
+    "upload_raw": 0.01689658400027838,
+    "sample_provenance": 5.800230733999797,
+    "write_generation": 1.6158399850000933,
+    "publish": 3.486276352999994,
+    "post_publish_inventory": 35.13632404400005,
+    "post_publish_sample_provenance": 5.66632433399991,
+    "post_publish_retain": 2.5126819730003263,
+    "post_publish": 43.315357722000044,
+    "cleanup": 0.2318163810000442,
+    "total": 186.71358832199985
+  },
+  "cleanup": {
+    "enabled": true,
+    "raw_enabled": true,
+    "generations_deleted": 1,
+    "copies_deleted": 731,
+    "copies_deleted_bytes": 12752504,
+    "raw_marked": 7213,
+    "raw_deleted": 0,
+    "raw_deleted_bytes": 0,
+    "reclaimable_generations": 1,
+    "reclaimable_copies": 731,
+    "reclaimable_copies_bytes": 12752504,
+    "reclaimable_raw": 0,
+    "reclaimable_raw_bytes": 0,
+    "total_bytes": 6975744804,
+    "over_7gb": false,
+    "failures": 0,
+    "elapsed_s": 549.363,
+    "timed_out": false
+  },
+  "bytes_below_7_decimal_gb": 24255196,
+  "limits": [
+    "total_bytes is the runtime-visible namespace, not an independent account-wide inventory.",
+    "raw_marked is new unique SHA markers, not deletions or newly fetched rows.",
+    "No raw objects were deleted by this run.",
+    "No production manifest or runs.jsonl was retrieved."
+  ]
+}

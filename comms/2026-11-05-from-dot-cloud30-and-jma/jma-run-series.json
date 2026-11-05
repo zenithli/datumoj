@@ -1,0 +1,103 @@
+{
+  "checked_at": "2026-11-05T11:07:00Z",
+  "scope": "Cloud source_end logs for runs 23 through 30; not production runs.jsonl",
+  "limit": "Equal aggregate counts do not establish same snapshot identity, subtype, or root cause.",
+  "runs": [
+    {
+      "run": 23,
+      "run_id": 41872393888,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41872393888",
+      "workflow_conclusion": "failure",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 423,
+      "parsed": 423,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 24,
+      "run_id": 41883912582,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41883912582",
+      "workflow_conclusion": "failure",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 545,
+      "parsed": 545,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 25,
+      "run_id": 41897316179,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41897316179",
+      "workflow_conclusion": "failure",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 490,
+      "parsed": 490,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 26,
+      "run_id": 41909348422,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41909348422",
+      "workflow_conclusion": "failure",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 518,
+      "parsed": 518,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 27,
+      "run_id": 41921244819,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41921244819",
+      "workflow_conclusion": "failure",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 376,
+      "parsed": 376,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 28,
+      "run_id": 41932584838,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41932584838",
+      "workflow_conclusion": "cancelled",
+      "head_sha": "f7e665e868df14b5ee17444d0b095f6ad508374e",
+      "source_event": "source_end",
+      "new": 420,
+      "parsed": 420,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 29,
+      "run_id": 41976431279,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/41976431279",
+      "workflow_conclusion": "failure",
+      "head_sha": "2f03e8949f219bcbc9bb637793d68fee04872f78",
+      "source_event": "source_end",
+      "new": 550,
+      "parsed": 550,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    },
+    {
+      "run": 30,
+      "run_id": 42003273693,
+      "url": "https://github.com/gorou5/datumoj/actions/runs/42003273693",
+      "workflow_conclusion": "failure",
+      "head_sha": "e602697f925e4d7f98cb01d4d5b42389ca39b68c",
+      "source_event": "source_end and final JSON",
+      "new": 538,
+      "parsed": 538,
+      "parse_index_failed": 1,
+      "stop_reason": "deadline"
+    }
+  ]
+}
