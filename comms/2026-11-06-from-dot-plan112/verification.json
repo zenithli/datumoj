@@ -1,0 +1,90 @@
+{
+  "issue": "https://github.com/gorou5/datumoj/issues/112",
+  "base": "cc3aa3d87b02a673cff046a70e2b985ce6889ba3",
+  "patch_tree": "002986d58c05ffba8201517c4f15355e00197f34",
+  "focused_passed": 19,
+  "focused_seconds": 0.75,
+  "ruff_passed": true,
+  "schemas_passed": 18,
+  "full_pytest_completed": false,
+  "browser_verified": false,
+  "production_changed": false,
+  "deployment_owner_verified": false,
+  "complete_site_backup": false,
+  "source_preservation": {
+    "base": "cc3aa3d87b02a673cff046a70e2b985ce6889ba3",
+    "only_html_addition_is_exact_announcements": true,
+    "unchanged": {
+      "plan/milestones.json": "cd8662bab68018d3f79902a40cf67c924fefe2bbbcb7684fd1b4cfe2c8b586a7",
+      "plan/assets/architecture.svg": "04beee566c4d6054af24b53d4b903775e3f849194817578727cb86ae48d6c7e8",
+      "plan/assets/swimlane.svg": "e1eec6a69f6b6d46d446390a8f025815f238101eb81e61565dc902b203089b38"
+    },
+    "changed_paths": [
+      "docs/plan-publication.md",
+      "plan/index.html",
+      "scripts/check_plan_site.py",
+      "tests/fixtures/plan/announcements.html",
+      "tests/test_plan_site.py"
+    ]
+  },
+  "responses": [
+    {
+      "url": "https://datumoj.com/plan/",
+      "started_at_utc": "2026-11-06T15:28:34Z",
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "redirect_to": null,
+      "body_bytes": 34641,
+      "body_sha256": "26fc860ce2cc89049ad603135c8d1a060ef54bc58fda03a98686c5b5e5d70397"
+    },
+    {
+      "url": "https://plan.datumoj.com/",
+      "started_at_utc": "2026-11-06T15:29:32.781559+00:00",
+      "http_status": 301,
+      "content_type": null,
+      "redirect_to": "https://datumoj.com/plan/",
+      "body_bytes": 0,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "url": "https://datumoj.com/plan/milestones.json",
+      "started_at_utc": "2026-11-06T15:29:44.345039+00:00",
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "redirect_to": null,
+      "body_bytes": 899223,
+      "body_sha256": "03b4a2988d624649f2dac2588310b4324ddd6ac30b797dfc43b6bbab3be7dffe"
+    },
+    {
+      "url": "https://datumoj.com/plan/agent-org/",
+      "started_at_utc": "2026-11-06T15:30:02.672855+00:00",
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "redirect_to": null,
+      "body_bytes": 52673,
+      "body_sha256": "d441b4ed062ee3dd3e8a1a15227bcdbaf0c1ecb283b863b5e97a00a4421fd51d"
+    },
+    {
+      "url": "https://datumoj.com/plan/hyoki-yure/",
+      "started_at_utc": "2026-11-06T15:30:06.483611+00:00",
+      "http_status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "redirect_to": null,
+      "body_bytes": 39638,
+      "body_sha256": "1b383264b0bcc9104a02f11eae808c1026b70b45cb36f9921158e9b6c91c3369"
+    },
+    {
+      "url": "https://datumoj.com/plan/hyoki-yure/sai-variants.png",
+      "started_at_utc": "2026-11-06T15:31:39.999838+00:00",
+      "http_status": 200,
+      "content_type": "image/png",
+      "redirect_to": null,
+      "body_bytes": 88642,
+      "body_sha256": "7f7011124b9dab3289f337af892bb9b8581153c78594364d1e5a6fb90aa80cac"
+    }
+  ],
+  "patch_sha256": {
+    "issue112-plan-preservation.patch": "b77157c8a736499f9c113cb435f846aa03af6d7153f0f9670349828c44215664",
+    "issue112-announcements-only.patch": "eb8d82f7dd4486df0723a4f139035a30960fc7a5c46625ea7e778c7f0e77935e"
+  }
+}

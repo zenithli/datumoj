@@ -1,0 +1,14 @@
+diff --git a/plan/index.html b/plan/index.html
+index aaa78ec..a54a569 100644
+--- a/plan/index.html
++++ b/plan/index.html
+@@ -73,6 +73,9 @@
+ <div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #b3382e;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：30 个单源数据失真验证案例</b> —— 假设一个国家的某项数据可能作假，再用 3 个以上独立数据源交叉打假（镜像法／实物量锚点／卫星复核／统计指纹）；13 例有公开实证记录，17 例是假设设计：<a href="verify/">30 个单源数据失真验证案例 →</a></div>
+ <div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #3d7a44;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：Hugging Face「government」数据集全量调查</b> —— 把 HF 上 389 个 government 关键词数据集全部盘点一遍：谁在做、都是什么、热度在哪，以及有没有人已经做过 datumoj 想做的事（结论：注册表与垂直登记库两个方向都是空白）：<a href="hf-gov/">389 个数据集全量调查报告 →</a></div>
+ 
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #cf7226;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：讨论板块「Agent 自组织与动态多中心治理」</b> —— datumoj 本身就是人类与 Agent 大型协作的一个实验场。这份开放研究计划（v0.2）把实验中遇到的问题写成可讨论、可证伪的命题：没有永久中心的 Agent 网络如何形成组织、维持行动连续性、并在扰动后恢复。欢迎协作者加入讨论与实验：<a href="agent-org/">Agent 自组织讨论板块 →</a></div>
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #3d7a44;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：研究计划「表記ゆれ：从文字差异到实体解析」</b> —— 同一个机构在不同系统里写法不一样（异体字、新旧字体、全角半角、旧称），到底算不算同一个实体？这份开放研究计划（v0.5）主张不强迫各来源统一表记，直接从真实记录出发学习实体关系，先以法人数据做试点验证，并规划冲刺 2027 年第 10 回日本开放创新大奖：<a href="hyoki-yure/">表記ゆれ研究计划 →</a></div>
++
+ 
+ <!-- 下面“版本路线图”和“里程碑”两节由 milestones.json 渲染；静态内容只在读取失败时显示。 -->
+ <h2 id="roadmap">版本路线图<span class="sub">每个版本取一个家纹作代号；任务编号 DATUMOJ-&lt;代号&gt;-&lt;序号&gt;，号段按开发线分</span></h2>

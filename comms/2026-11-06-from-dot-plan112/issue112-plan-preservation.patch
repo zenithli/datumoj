@@ -1,0 +1,379 @@
+diff --git a/docs/plan-publication.md b/docs/plan-publication.md
+new file mode 100644
+index 0000000..fc02580
+--- /dev/null
++++ b/docs/plan-publication.md
+@@ -0,0 +1,97 @@
++# Plan 页面：保全、构建与验收
++
++本说明只准备可审阅的静态产物及检查步骤，**不授权部署**，不添加凭证、CI 自动发布或 Cloudflare 配置。对应 [Issue #112](https://github.com/gorou5/datumoj/issues/112)。
++
++## 已知事实与发布边界
++
++2026-11-06 核查：
++
++- 基线 `main` 为 `cc3aa3d87b02a673cff046a70e2b985ce6889ba3`，包含已合并的 [PR #111](https://github.com/gorou5/datumoj/pull/111)。`plan/milestones.json` 保留 0.3 `doing`、P1 `done`、H4 `doing`，更新日为 `2026-11-06`。这次只恢复首页缺失的两条公告，不修改里程碑状态或渲染器。
++- `https://plan.datumoj.com/` 实际返回 301 到 `https://datumoj.com/plan/`，与 `CLAUDE.md` 所述的独立 Pages 根目录部署存在差异。`https://datumoj.com/` 是独立首页，不能用 `plan/index.html` 替换。
++- `/plan/milestones.json` 三次检查（包括 no-cache）均返回 HTTP 200、`text/html`，而不是 JSON。其内容与站点首页相似但并非字节完全相同。返回成功状态并不证明文件存在；现象符合缺失路径落入首页/SPA fallback，但仅凭 HTTP 不能确定是构建目录、路由规则、缓存还是其他原因。
++- 当前仓库缺少 `plan/agent-org/index.html`、`plan/hyoki-yure/index.html`、`plan/hyoki-yure/sai-variants.png`，但这两个研究页面及图片线上存在。只从 `main/plan/` 整目录替换发布会有丢失风险。
++- `.github/workflows/ci.yml` 明确未配置部署。仓库中只有 `tel/wrangler.toml`，它不是 plan 站点的发布配置。不要套用或修改它。
++- 公共 HTML 与图片快照只是局部证据，不是完整站点、资产、重定向或部署配置备份。
++
++公告在 `tests/fixtures/plan/announcements.html` 保存了核查时两条完整 HTML（含 v0.2、v0.5 文字及相对链接），用于回归保护。它们来自 `/plan/` 当时的页面，SHA-256：`26fc860ce2cc89049ad603135c8d1a060ef54bc58fda03a98686c5b5e5d70397`。日后有意修改公告时，应同时审阅测试快照。
++
++## 维护者先确认
++
++1. 谁拥有当前 `datumoj.com` 及旧 `plan.datumoj.com` 的 Pages/Workers 项目？当前生产部署 ID、来源仓库/分支、构建命令、输出目录分别是什么？
++2. `/plan/` 是同一项目的子目录、代理还是另一独立项目？301、rewrite、SPA fallback、404 和缓存规则在哪里管理？不要只看仓库文档推断生产设置。
++3. 完整、可复现且已授权使用的发布输入在哪里？必须包括独立根首页、其他子站、两个研究页面及 `sai-variants.png`，并记录它们的版本或清单哈希。
++4. 明确审阅者、发布时间、回滚部署 ID，以及是否批准未来自动部署。没有这些确认，不替换生产产物，也不新增凭证。
++
++## 确定性的本地构建方案（待维护者确认实际拓扑）
++
++若确认公开布局是同一个站点根目录下的 `/plan/`，目标布局应为：
++
++```text
++site-output/
++  index.html                     # 保留现有独立根首页
++  ...                            # 保留所有其他现有站点文件及路由配置
++  plan/
++    index.html                   # 本次公告保全后的 main 版本
++    milestones.json              # 与同一 main 提交一致
++    assets/{architecture,swimlane}.svg
++    {orbis,cases,verify,hf-gov}/...
++    agent-org/index.html         # 已审核的现有研究内容
++    hyoki-yure/index.html
++    hyoki-yure/sai-variants.png
++```
++
++构建只做本地合成：输入为**固定提交的仓库**和**固定版本的完整现有站点产物**。复制完整产物到新目录，再覆盖仓库内已跟踪的 `plan/` 静态文件；绝不使用删除同步，绝不把整个仓库作为公开目录，绝不从只有首页的快照重建生产站点。下面脚本拒绝复用已有输出目录，且不访问网络、不部署：
++
++```bash
++# 在审核后的仓库根目录运行；SOURCE_SITE 是维护者提供的完整站点产物。
++export SOURCE_SITE=/path/to/approved-complete-site
++export OUTPUT_SITE=/path/to/new-site-output
++python - <<'PY'
++import os, shutil, subprocess
++from pathlib import Path
++source = Path(os.environ['SOURCE_SITE']).resolve()
++out = Path(os.environ['OUTPUT_SITE']).resolve()
++if not (source / 'index.html').is_file() or out.exists() or out.is_relative_to(source):
++    raise SystemExit('需要完整输入和全新的独立输出目录')
++shutil.copytree(source, out)
++paths = subprocess.check_output(['git', 'ls-files', '-z', 'plan/']).decode().split('\0')
++for name in filter(None, paths):
++    path = Path(name)
++    if path.suffix not in {'.html', '.json', '.svg', '.png', '.css', '.js', '.ico'}:
++        continue
++    target = out / path
++    target.parent.mkdir(parents=True, exist_ok=True)
++    shutil.copyfile(path, target)
++print(out)
++PY
++python scripts/check_plan_site.py "$OUTPUT_SITE/plan"
++```
++
++相同输入的文件内容应相同。记录仓库 SHA、输入站点的 SHA-256 文件清单和输出文件清单；复建后比较清单。保持 `plan/index.html` 与相邻的 JSON/资源一起更新，不能只发布 HTML。
++
++若维护者确认仍应由独立项目根目录服务 plan，则使用经过同样完整保全的 plan 子树作为输出根，并对 `/` 运行下述验收。不得先改生产拓扑来适配本说明。
++
++## 离线检查与 HTTP 验收
++
++```bash
++uv run --frozen pytest -q tests/test_plan_site.py
++python scripts/check_plan_site.py /path/to/approved-complete-site/plan
++```
++
++目前直接运行 `python scripts/check_plan_site.py plan` **应失败**并列出三个未入仓的研究页面/图片。这是保护门槛，不是把缺失内容编造出来、跳过检查或部署不完整目录的理由。
++
++维护者批准的预览产物准备好后：
++
++```bash
++python scripts/check_plan_site.py /path/to/approved-complete-site/plan \
++  --url https://approved-preview.example/plan/
++```
++
++检查器默认离线；只有明确传入 `--url` 才发 GET，逐文件限制 5 MiB、超时 15 秒，不带登录凭证。它检查 12 个已知 plan 文件及其相对路径、两条公告标题/链接、里程碑 JSON 必需字段，并要求 HTTP MIME 和响应字节匹配已审阅的本地产物。`/plan/milestones.json` 为 HTML，即使 HTTP 200 或错误声明为 JSON，也必须失败。字节匹配也能发现旧缓存。它不是完整站点清单或浏览器渲染测试。
++
++人工验收还需：
++
++- 分别在桌面和手机宽度打开 `/plan/`，确认两条公告原文、链接和研究页面图片；版本卡片由 JSON 渲染，0.3 和 H4 显示试运行，P1 已完成，没有读取失败提示，当前新来源内容仍在。
++- 检查站点根首页、其他已发布子站及既有导航未变化，确认 `plan.datumoj.com` 301 仍到正确地址。
++- 在预览站检查一个不存在的 JSON 路径。静态资源的缺失应明确返回 404；若统一 fallback 返回首页，先由维护者查清并审批路由/404 修正，不在本补丁中猜改生产设置。
++- 经明确部署授权后才由维护者发布，再针对生产运行同一 HTTP 验收。失败就按已确认部署 ID 回滚，保留证据，不把“请求成功”当作“数据正确”。
+diff --git a/plan/index.html b/plan/index.html
+index aaa78ec..a54a569 100644
+--- a/plan/index.html
++++ b/plan/index.html
+@@ -73,6 +73,9 @@
+ <div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #b3382e;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：30 个单源数据失真验证案例</b> —— 假设一个国家的某项数据可能作假，再用 3 个以上独立数据源交叉打假（镜像法／实物量锚点／卫星复核／统计指纹）；13 例有公开实证记录，17 例是假设设计：<a href="verify/">30 个单源数据失真验证案例 →</a></div>
+ <div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #3d7a44;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：Hugging Face「government」数据集全量调查</b> —— 把 HF 上 389 个 government 关键词数据集全部盘点一遍：谁在做、都是什么、热度在哪，以及有没有人已经做过 datumoj 想做的事（结论：注册表与垂直登记库两个方向都是空白）：<a href="hf-gov/">389 个数据集全量调查报告 →</a></div>
+ 
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #cf7226;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：讨论板块「Agent 自组织与动态多中心治理」</b> —— datumoj 本身就是人类与 Agent 大型协作的一个实验场。这份开放研究计划（v0.2）把实验中遇到的问题写成可讨论、可证伪的命题：没有永久中心的 Agent 网络如何形成组织、维持行动连续性、并在扰动后恢复。欢迎协作者加入讨论与实验：<a href="agent-org/">Agent 自组织讨论板块 →</a></div>
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #3d7a44;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：研究计划「表記ゆれ：从文字差异到实体解析」</b> —— 同一个机构在不同系统里写法不一样（异体字、新旧字体、全角半角、旧称），到底算不算同一个实体？这份开放研究计划（v0.5）主张不强迫各来源统一表记，直接从真实记录出发学习实体关系，先以法人数据做试点验证，并规划冲刺 2027 年第 10 回日本开放创新大奖：<a href="hyoki-yure/">表記ゆれ研究计划 →</a></div>
++
+ 
+ <!-- 下面“版本路线图”和“里程碑”两节由 milestones.json 渲染；静态内容只在读取失败时显示。 -->
+ <h2 id="roadmap">版本路线图<span class="sub">每个版本取一个家纹作代号；任务编号 DATUMOJ-&lt;代号&gt;-&lt;序号&gt;，号段按开发线分</span></h2>
+diff --git a/scripts/check_plan_site.py b/scripts/check_plan_site.py
+new file mode 100644
+index 0000000..c2b926d
+--- /dev/null
++++ b/scripts/check_plan_site.py
+@@ -0,0 +1,119 @@
++"""Check a complete plan artifact, optionally comparing its HTTP responses.
++
++Offline: python scripts/check_plan_site.py /path/to/approved-artifact/plan
++HTTP: append --url https://preview.example/plan/ (read-only GETs, no credentials).
++This is an acceptance gate, not a builder/deployer or a full datumoj.com backup.
++Python 3.12+, standard library only. See docs/plan-publication.md for boundaries.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import re
++from html.parser import HTMLParser
++from pathlib import Path
++from urllib.error import URLError
++from urllib.parse import urljoin, urlsplit
++from urllib.request import Request, urlopen
++
++CONTENT_TYPES = {".html": "text/html", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png"}
++# Includes the two live-only research sections and the known image dependency.
++# This list is not an inventory of the rest of datumoj.com.
++REQUIRED = (
++    "index.html", "milestones.json", "assets/architecture.svg", "assets/swimlane.svg",
++    "orbis/index.html", "cases/index.html", "verify/index.html", "hf-gov/index.html", "hf-gov/datasets.json",
++    "agent-org/index.html", "hyoki-yure/index.html", "hyoki-yure/sai-variants.png",
++)
++MAX_BYTES = 5 * 1024 * 1024
++
++
++class Page(HTMLParser):
++    def __init__(self):
++        super().__init__()
++        self.links = set()
++        self.has_base = False
++
++    def handle_starttag(self, tag, attrs):
++        attrs = dict(attrs)
++        if tag == "a":
++            self.links.add(attrs.get("href"))
++        if tag == "base":
++            self.has_base = True
++
++
++def check_artifact(root: Path) -> dict[str, bytes]:
++    """Validate known plan files without changing the artifact; fail closed."""
++    missing = [name for name in REQUIRED if not (root / name).is_file()]
++    if missing:
++        raise ValueError("missing artifact files: " + ", ".join(missing))
++    for name in REQUIRED:
++        if (root / name).stat().st_size > MAX_BYTES:
++            raise ValueError(f"artifact file too large: {name}")
++    files = {name: (root / name).read_bytes() for name in REQUIRED}
++    page = files["index.html"].decode("utf-8")
++    parsed = Page()
++    parsed.feed(page)
++    if (not {"agent-org/", "hyoki-yure/"} <= parsed.links
++            or "Agent 自组织与动态多中心治理" not in page or "表記ゆれ：从文字差异到实体解析" not in page):
++        raise ValueError("index.html: missing research announcement links")
++    if parsed.has_base or not re.search(r'''fetch\(\s*["']milestones\.json["']\s*,''', page):
++        raise ValueError("index.html: expected relative milestones.json fetch without a base override")
++    try:
++        data = json.loads(files["milestones.json"])
++        versions = data["versions"]
++        milestones = data["milestones"]
++        statuses = {"done", "doing", "pending", "planned"}
++        if not isinstance(data["updated"], str) or not data["updated"]:
++            raise ValueError
++        if not isinstance(versions, list) or not versions or not isinstance(milestones, list) or not milestones:
++            raise ValueError
++        if any(not v["version"] or not v["codename"] or v["status"] not in statuses for v in versions):
++            raise ValueError
++        known = {v["version"] for v in versions}
++        if any(not m["id"] or not m["title"] or m["version"] not in known or m["status"] not in statuses
++               for m in milestones):
++            raise ValueError
++    except (KeyError, TypeError, ValueError) as exc:
++        raise ValueError("milestones.json: invalid JSON or renderer fields") from exc
++    return files
++
++
++def check_http(files: dict[str, bytes], base_url: str) -> None:
++    """Compare approved local bytes with bounded, unauthenticated HTTP GETs."""
++    url = urlsplit(base_url)
++    if (url.scheme not in {"http", "https"} or not url.netloc or not url.path.endswith("/")
++            or url.username or url.password or url.query or url.fragment):
++        raise ValueError("base URL must be HTTP(S), end in '/', and contain no credentials/query/fragment")
++    for name, expected in files.items():
++        # Fetch canonical directory routes as a browser does, including /plan/.
++        route = "" if name == "index.html" else name.removesuffix("index.html")
++        request = Request(urljoin(base_url, route), headers={"Cache-Control": "no-cache"})
++        with urlopen(request, timeout=15) as response:
++            mime = CONTENT_TYPES[Path(name).suffix]
++            if response.status != 200 or response.headers.get_content_type() != mime:
++                raise ValueError(f"{name}: expected HTTP 200 {mime}, not fallback/error content")
++            actual = response.read(MAX_BYTES + 1)
++            if len(actual) > MAX_BYTES or actual != expected:
++                raise ValueError(f"{name}: response differs from approved artifact (stale build or fallback)")
++
++
++def main(argv=None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("root", type=Path, help="complete plan subtree, not the site's root")
++    parser.add_argument("--url", help="optional exact HTTP(S) plan base URL ending in /")
++    args = parser.parse_args(argv)
++    try:
++        files = check_artifact(args.root)
++        if args.url:
++            check_http(files, args.url)
++    except (OSError, ValueError, URLError) as exc:
++        print(f"FAIL: {exc}")
++        return 1
++    print(f"PASS: {len(files)} known plan files checked" + (" against HTTP" if args.url else " offline"))
++    print("This does not authorize publication or verify the rest of datumoj.com.")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/tests/fixtures/plan/announcements.html b/tests/fixtures/plan/announcements.html
+new file mode 100644
+index 0000000..2483141
+--- /dev/null
++++ b/tests/fixtures/plan/announcements.html
+@@ -0,0 +1,2 @@
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #cf7226;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：讨论板块「Agent 自组织与动态多中心治理」</b> —— datumoj 本身就是人类与 Agent 大型协作的一个实验场。这份开放研究计划（v0.2）把实验中遇到的问题写成可讨论、可证伪的命题：没有永久中心的 Agent 网络如何形成组织、维持行动连续性、并在扰动后恢复。欢迎协作者加入讨论与实验：<a href="agent-org/">Agent 自组织讨论板块 →</a></div>
++<div style="background:#fff;border:1px solid #e3e1da;border-left:4px solid #3d7a44;border-radius:10px;padding:14px 18px;margin:18px 0"><b>新：研究计划「表記ゆれ：从文字差异到实体解析」</b> —— 同一个机构在不同系统里写法不一样（异体字、新旧字体、全角半角、旧称），到底算不算同一个实体？这份开放研究计划（v0.5）主张不强迫各来源统一表记，直接从真实记录出发学习实体关系，先以法人数据做试点验证，并规划冲刺 2027 年第 10 回日本开放创新大奖：<a href="hyoki-yure/">表記ゆれ研究计划 →</a></div>
+diff --git a/tests/test_plan_site.py b/tests/test_plan_site.py
+new file mode 100644
+index 0000000..6a7314f
+--- /dev/null
++++ b/tests/test_plan_site.py
+@@ -0,0 +1,123 @@
++"""Regressions for preserving the plan page before repairing publication."""
++
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++def test_plan_preserves_both_verified_live_announcements():
++    """A main-based publish must not silently lose the two live notices."""
++    expected = (ROOT / "tests/fixtures/plan/announcements.html").read_text(encoding="utf-8").splitlines()
++    page = (ROOT / "plan/index.html").read_text(encoding="utf-8")
++    assert len(expected) == 2
++    for announcement in expected:
++        assert page.count(announcement) == 1
++
++
++import json
++import runpy
++import shutil
++
++import pytest
++
++
++@pytest.fixture
++def checker():
++    path = ROOT / "scripts/check_plan_site.py"
++    assert path.is_file(), "artifact acceptance checker is not implemented"
++    return runpy.run_path(str(path))
++
++
++@pytest.fixture
++def artifact(tmp_path):
++    root = tmp_path / "site" / "plan"
++    shutil.copytree(ROOT / "plan", root)
++    # Synthetic local-only fixtures, not replacements for the missing live pages.
++    for page in ("agent-org", "hyoki-yure"):
++        (root / page).mkdir()
++        (root / page / "index.html").write_text(f"<!doctype html><title>{page} fixture</title>")
++    (root / "hyoki-yure/sai-variants.png").write_bytes(b"\x89PNG\r\n\x1a\nfixture")
++    return root
++
++
++def test_checker_accepts_complete_artifact_without_writes(checker, artifact):
++    before = {p.relative_to(artifact): p.read_bytes() for p in artifact.rglob("*") if p.is_file()}
++    checked = checker["check_artifact"](artifact)
++    assert "milestones.json" in checked
++    assert "agent-org/index.html" in checked
++    assert "hyoki-yure/sai-variants.png" in checked
++    assert before == {p.relative_to(artifact): p.read_bytes() for p in artifact.rglob("*") if p.is_file()}
++
++
++@pytest.mark.parametrize("missing", ["milestones.json", "agent-org/index.html", "hyoki-yure/sai-variants.png"])
++def test_checker_rejects_incomplete_publish_directory(checker, artifact, missing):
++    (artifact / missing).unlink()
++    with pytest.raises(ValueError, match="missing"):
++        checker["check_artifact"](artifact)
++
++
++@pytest.mark.parametrize("body", [b"<!doctype html><title>SPA fallback</title>", b"{}", b'{"versions":[],"milestones":[]}'])
++def test_checker_rejects_html_and_unrenderable_milestone_data(checker, artifact, body):
++    (artifact / "milestones.json").write_bytes(body)
++    with pytest.raises(ValueError, match="milestones"):
++        checker["check_artifact"](artifact)
++
++
++def test_checker_rejects_milestone_reference_to_unknown_version(checker, artifact):
++    path = artifact / "milestones.json"
++    data = json.loads(path.read_text())
++    data["milestones"][0]["version"] = "unknown"
++    path.write_text(json.dumps(data))
++    with pytest.raises(ValueError, match="milestones"):
++        checker["check_artifact"](artifact)
++
++
++@pytest.mark.parametrize("before,after", [
++    ('href="agent-org/"', 'href="wrong/"'),
++    ('fetch("milestones.json"', 'fetch("/milestones.json"'),
++])
++def test_checker_rejects_broken_announcement_or_mount_path(checker, artifact, before, after):
++    path = artifact / "index.html"
++    path.write_text(path.read_text().replace(before, after))
++    with pytest.raises(ValueError, match="index.html"):
++        checker["check_artifact"](artifact)
++
++
++@pytest.mark.parametrize("mount", ["/", "/plan/"])
++def test_http_checker_resolves_relative_files_at_both_mounts(checker, artifact, httpserver, mount):
++    checked = checker["check_artifact"](artifact)
++    for path, body in checked.items():
++        route = mount if path == "index.html" else mount + path.replace("/index.html", "/")
++        mime = checker["CONTENT_TYPES"][Path(path).suffix]
++        httpserver.expect_request(route, method="GET").respond_with_data(body, content_type=mime)
++    checker["check_http"](checked, httpserver.url_for(mount))
++    httpserver.check_assertions()
++
++
++@pytest.mark.parametrize("mime,body", [
++    ("text/html", b"<!doctype html><title>homepage fallback</title>"),
++    ("application/json", b"<!doctype html><title>wrong MIME too</title>"),
++    ("application/json", b'{"updated":"stale"}'),
++])
++def test_http_checker_rejects_200_html_or_stale_json(checker, httpserver, mime, body):
++    httpserver.expect_request("/plan/milestones.json").respond_with_data(body, content_type=mime)
++    with pytest.raises(ValueError, match="milestones.json"):
++        checker["check_http"]({"milestones.json": b'{"updated":"current"}'}, httpserver.url_for("/plan/"))
++
++
++def test_http_checker_requires_explicit_directory_url(checker):
++    for url in ("https://example.test/plan", "file:///tmp/", "https://user:password@example.test/"):
++        with pytest.raises(ValueError, match="base URL"):
++            checker["check_http"]({}, url)
++
++
++def test_checker_rejects_notice_text_removed_but_link_retained(checker, artifact):
++    path = artifact / "index.html"
++    path.write_text(path.read_text().replace("Agent 自组织与动态多中心治理", "removed"))
++    with pytest.raises(ValueError, match="index.html"):
++        checker["check_artifact"](artifact)
++
++
++def test_checker_cli_rejects_incomplete_main_without_publish(checker, capsys):
++    assert checker["main"]([str(ROOT / "plan")]) == 1
++    assert "agent-org/index.html" in capsys.readouterr().out
