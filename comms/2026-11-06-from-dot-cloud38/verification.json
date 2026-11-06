@@ -1,0 +1,78 @@
+{
+  "base_commit": "cc3aa3d87b02a673cff046a70e2b985ce6889ba3",
+  "patched_tree": "c05684575288161b2adf5a047b86a60777d38c40",
+  "patch_sha256": "6ddb1c924902271b734bec6ee621e51cbe5400f6b5475d59b132337a29f0a069",
+  "public_evidence": "https://github.com/gorou5/datumoj/actions/runs/42277764157/job/128098463804",
+  "independent_combined_test": {
+    "command": "PYTHONPATH=\"$PWD/src:$PWD\" python -m pytest -q tests/test_cloud_maintenance_diagnostics.py tests/test_source_issues.py tests/test_cloud_workflow.py tests/test_cloud_run.py tests/test_cloud_embed.py tests/test_cloud_reports.py tests/test_pipeline_vectors.py tests/index/test_vector.py tests/index/test_vector_maintain.py tests/core/test_lease.py tests/core/test_state_vectors.py",
+    "passed": 404,
+    "failed": 0,
+    "seconds": 159.4,
+    "exit_code": 0
+  },
+  "supporting_runs_not_additive": [
+    {
+      "name": "unchanged-base real vector maintenance/state",
+      "passed": 53,
+      "seconds": 10.64
+    },
+    {
+      "name": "maintenance diagnostics TDD red",
+      "failed": 15,
+      "passed": 1
+    },
+    {
+      "name": "maintenance diagnostics green",
+      "passed": 16,
+      "seconds": 20.8
+    },
+    {
+      "name": "source issue/workflow TDD red",
+      "failed": 23,
+      "passed": 57
+    },
+    {
+      "name": "source issue/workflow direct green",
+      "passed": 80
+    },
+    {
+      "name": "source issue cloud/audit regression",
+      "passed": 196,
+      "seconds": 68.14
+    }
+  ],
+  "checks": {
+    "ruff_src_tests_scripts": "pass",
+    "schemas": "18 descriptions pass",
+    "tracked_json_parse": 228,
+    "workflow_yaml_parse": 3,
+    "diff_whitespace": "pass",
+    "patch_applies_to_exact_base": "pass",
+    "independent_code_review": "no actionable findings",
+    "ruff_all": "5 pre-existing findings in unchanged tel/scripts; not fixed"
+  },
+  "exact_cloud38_replay": {
+    "exit_code": 1,
+    "fake_gh_calls": 0,
+    "preexisting_issues_unchanged": 4,
+    "fixed_warning_and_summary": true,
+    "real_github_calls": 0
+  },
+  "environment": {
+    "python": "3.12.14",
+    "pytest": "9.1.1",
+    "ruff": "0.17.1",
+    "lancedb": "0.40.0",
+    "pyarrow": "26.0.0",
+    "proxy": "unchanged",
+    "additional_existing_test_support": "socksio 1.0.0"
+  },
+  "limits": [
+    "Underlying maintenance failure not reproduced or fixed",
+    "No full test suite",
+    "No hosted CI for this candidate",
+    "No production state downloaded or production run dispatched",
+    "No deployment or upstream write",
+    "Source-sync continue-on-error unchanged; step conclusion may still be success"
+  ]
+}

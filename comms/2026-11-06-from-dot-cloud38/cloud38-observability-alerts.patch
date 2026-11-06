@@ -1,0 +1,480 @@
+diff --git a/.github/workflows/cloud-run.yml b/.github/workflows/cloud-run.yml
+index 0822d1d..8383ee1 100644
+--- a/.github/workflows/cloud-run.yml
++++ b/.github/workflows/cloud-run.yml
+@@ -73,6 +73,8 @@ jobs:
+           uv run --frozen rikolto cloud run --max-embed 1000 --max-minutes 40 --reserve-minutes 25 | tee "$RUNNER_TEMP/cloud-result.json"
+       - name: Sync source health issues
+         if: always()
++        # Keep sync nonblocking. Failure is visible in its outcome and the
++        # unpublished-result warning/summary, not the step's conclusion.
+         continue-on-error: true
+         env:
+           GH_REPO: ${{ github.repository }}
+diff --git a/scripts/source_issues.py b/scripts/source_issues.py
+index 9492785..33a86cb 100644
+--- a/scripts/source_issues.py
++++ b/scripts/source_issues.py
+@@ -8,18 +8,28 @@ Cloud supplies ok (no item failures), degraded (partial item failures), or faile
+ failures exceeding 50% of attempts). ok and degraded close issues; only failed
+ opens after the threshold. The existing missing scheduling alert is retained;
+ deadline alone does not open an issue.
++Only published generations may change source issues. An unpublished result
++returns 1 with a fixed warning and Actions summary, without invoking gh. The
++explicit skipped/exit-0 result with no health rows is a successful no-op.
+ """
+ 
+ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import re
+ import subprocess
+ from datetime import datetime
+ from pathlib import Path
+ 
+ LABEL = "source-broken"
++UNPUBLISHED_MESSAGE = ("source_issues reason=unpublished_result; no published generation; "
++                       "source issues unchanged; recovery not confirmed.")
++
++
++class UnpublishedResultError(ValueError):
++    """Source health cannot drive issue changes before publication."""
+ 
+ 
+ def issue_text(health, generation):
+@@ -73,9 +83,20 @@ class GitHub:
+ def sync_issues(result, threshold=2):
+     if type(threshold) is not int or threshold < 1:
+         raise ValueError("invalid_threshold")
++    if not isinstance(result, dict) or not isinstance(result.get("source_health"), list):
++        raise ValueError("invalid_result")
++    generation = result["generation"]
++    if generation is None:
++        # Lease contention has no source observations to publish or reconcile.
++        if (result.get("status") == "skipped" and type(result.get("exit_status")) is int
++                and result["exit_status"] == 0 and not result["source_health"]):
++            return 0
++        raise UnpublishedResultError
++    if type(generation) is not int or generation < 1:
++        raise ValueError("invalid_generation")
+     # Validate every rendered field before any network operation. Ignore all
+     # other result keys, including sources, exception details and storage data.
+-    entries = [(row, issue_text(row, result["generation"])) for row in result["source_health"]]
++    entries = [(row, issue_text(row, generation)) for row in result["source_health"]]
+     active = [(row, text) for row, text in entries
+               if row["status"] in {"ok", "degraded", "missing"}
+               or row["status"] == "failed" and row["consecutive_failures"] >= threshold]
+@@ -126,6 +147,15 @@ def main(argv=None):
+     args = parser.parse_args(argv)
+     try:
+         failures = sync_issues(json.loads(args.result.read_text(encoding="utf-8")), args.threshold)
++    except UnpublishedResultError:
++        failures = 1
++        print(f"::warning::{UNPUBLISHED_MESSAGE}")
++        if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
++            try:
++                with Path(summary).open("a", encoding="utf-8") as stream:
++                    stream.write(f"\n### Source health issue sync\n\n{UNPUBLISHED_MESSAGE}\n")
++            except (OSError, ValueError):
++                print("::warning::source_issues reason=summary_write_failed")
+     except Exception:  # noqa: BLE001 -- Public job boundary must never expose input or exception text.
+         failures = 1
+     if failures:
+diff --git a/src/datumoj/rikolto/cloud.py b/src/datumoj/rikolto/cloud.py
+index ccebb6c..82008f7 100644
+--- a/src/datumoj/rikolto/cloud.py
++++ b/src/datumoj/rikolto/cloud.py
+@@ -103,6 +103,19 @@ def _safe_timings(values):
+             if key in _TIMING_FIELDS and type(value) in (int, float) and math.isfinite(value) and value >= 0}
+ 
+ 
++def _maintenance_failure(operation, exc):
++    """Describe a failed boundary using fixed codes, never exception text or names."""
++    if operation not in {"local_write_enter", "maintain_vectors", "local_write_exit", "lease_check"}:
++        operation = "unknown"
++    category = next((name for kind, name in (
++        (LeaseError, "lease_error"), (OSError, "os_error"), (ValueError, "value_error"),
++        (LookupError, "lookup_error"), (RuntimeError, "runtime_error"), (MemoryError, "memory_error"),
++    ) if isinstance(exc, kind)), "unexpected_error")
++    details = {"phase": "maintenance", "operation": operation, "error_category": category}
++    print(json.dumps({"event": "maintenance_failed", **details}), file=sys.__stderr__, flush=True)
++    return details
++
++
+ def _throttled_check(check, *, monotonic=time.monotonic):
+     """Check at most once per 30s for immutable uploads, shared by transfer threads."""
+     last = None
+@@ -649,9 +662,13 @@ def _round(*, work_dir, max_embed, max_minutes, reserve_minutes, embed_only, no_
+                         phase = "backfill"
+                         remaining = _backfill(deps, remaining, started, max_minutes, check, result, before_round)
+                     phase = "maintenance"
++                    maintenance_operation = "local_write_enter"
+                     with local_write(root):
++                        maintenance_operation = "maintain_vectors"
+                         maintain_vectors(root / "vectors")
++                        maintenance_operation = "local_write_exit"
+                     marked = marking_failed = 0
++                    maintenance_operation = "lease_check"
+                     check()
+                     try:
+                         with local_write(root):
+@@ -702,8 +719,10 @@ def _round(*, work_dir, max_embed, max_minutes, reserve_minutes, embed_only, no_
+                         )
+                     result.update(status="failed" if failed else "completed", exit_status=int(failed),
+                                   reason=("embedding_failed" if embed_only else "source_failed") if failed else None)
+-        except Exception:  # noqa: BLE001 -- 云端运行边界必须把任意 SDK 或插件失败记为本轮失败。
++        except Exception as exc:  # noqa: BLE001 -- 云端运行边界必须把任意 SDK 或插件失败记为本轮失败。
+             result.update(status="failed", exit_status=1, reason=f"{phase}_failed")
++            if phase == "maintenance":
++                result["maintenance_failure"] = _maintenance_failure(maintenance_operation, exc)
+         finally:
+             if deps is not None:
+                 for name in ("manifest", "chunks", "keyword", "catalog", "change_log", "raw"):
+diff --git a/tests/test_cloud_maintenance_diagnostics.py b/tests/test_cloud_maintenance_diagnostics.py
+new file mode 100644
+index 0000000..930f48a
+--- /dev/null
++++ b/tests/test_cloud_maintenance_diagnostics.py
+@@ -0,0 +1,167 @@
++"""Maintenance diagnostics expose only fixed codes, preserving fail-closed publication."""
++
++import io
++import json
++import logging
++import sys
++from contextlib import contextmanager
++from datetime import timedelta
++
++import pytest
++
++from datumoj.rikolto import cloud
++from datumoj.rikolto.core.lease import LeaseError, LeaseManager
++from datumoj.rikolto.core.state import StateManager
++from datumoj.rikolto.index import vector
++from datumoj.rikolto.index.embed import HashEmbedder
++from tests.test_cloud_embed import invoke_embed
++from tests.test_cloud_run import BODY, ENV, invoke, released, remote
++from tests.test_cloud_run import world as world  # noqa: PLC0414 -- Shared offline fixture.
++
++_PRIVATE = "synthetic-private-error /private/source.txt https://private.invalid/?token=secret"
++
++
++@pytest.fixture
++def maintained(world, monkeypatch):
++    world.overrides.pop("vectors")
++    world.overrides["embedder"] = HashEmbedder(model="fake-hash-v1")
++    first, _ = invoke(world, "initial", "--max-embed", "0")
++    assert first["generation"] == 1 and first["vector_pending"] == 6
++    world.clock[0] += timedelta(hours=1)
++    stream = io.StringIO()
++    monkeypatch.setattr(sys, "__stderr__", stream)
++    return world, remote(world).get("current.json"), stream
++
++
++def _assert_failure(maintained, result, operation, category):
++    world, before, stream = maintained
++    details = {"phase": "maintenance", "operation": operation, "error_category": category}
++    assert result["status"] == "failed" and result["exit_status"] == 1
++    assert result["reason"] == "maintenance_failed" and result["generation"] is None
++    assert result["publish_timings"] == {}
++    assert remote(world).get("current.json") == before
++    assert len(world.managers[-1].list()) == 1
++    released(world)
++    assert result.get("maintenance_failure") == details
++    events = [json.loads(line) for line in stream.getvalue().splitlines()]
++    assert [row for row in events if row["event"] == "maintenance_failed"] == [
++        {"event": "maintenance_failed", **details},
++    ]
++    assert not any(row["event"] == "publish_start" for row in events)
++    public = json.dumps(result) + stream.getvalue()
++    assert all(value not in public for value in (_PRIVATE, BODY.decode(), *ENV.values(), *world.tokens))
++    assert "Traceback" not in public
++
++
++@pytest.mark.parametrize("mode", ["run", "embed"])
++@pytest.mark.parametrize("boundary", ["local_write_enter", "maintain_vectors", "local_write_exit", "lease_check"])
++def test_maintenance_failure_identifies_boundary_without_publishing(maintained, monkeypatch, mode, boundary):
++    world, _, _ = maintained
++    armed = False
++    backfill = cloud._backfill
++    local_write = cloud.local_write
++    maintain = cloud.maintain_vectors
++    check = LeaseManager.check
++
++    def finish_backfill(*args, **kwargs):
++        nonlocal armed
++        result = backfill(*args, **kwargs)
++        armed = True
++        return result
++
++    @contextmanager
++    def write(root):
++        if armed and boundary == "local_write_enter":
++            raise OSError(_PRIVATE)
++        with local_write(root):
++            yield
++        if armed and boundary == "local_write_exit":
++            raise OSError(_PRIVATE)
++
++    def vectors(path):
++        if boundary == "maintain_vectors":
++            print(_PRIVATE)
++            logging.getLogger(__name__).error(_PRIVATE)
++            raise RuntimeError(_PRIVATE)
++        return maintain(path)
++
++    def lease_check(self, lease):
++        if armed and boundary == "lease_check":
++            raise LeaseError(_PRIVATE)
++        return check(self, lease)
++
++    monkeypatch.setattr(cloud, "_backfill", finish_backfill)
++    monkeypatch.setattr(cloud, "local_write", write)
++    monkeypatch.setattr(cloud, "maintain_vectors", vectors)
++    monkeypatch.setattr(LeaseManager, "check", lease_check)
++    result = invoke(world)[0] if mode == "run" else invoke_embed(world)
++    category = {"maintain_vectors": "runtime_error", "lease_check": "lease_error"}.get(boundary, "os_error")
++    _assert_failure(maintained, result, boundary, category)
++
++
++@pytest.mark.parametrize("failure, category", [
++    (ValueError(_PRIVATE), "value_error"),
++    (KeyError(_PRIVATE), "lookup_error"),
++    (MemoryError(_PRIVATE), "memory_error"),
++    (type("UntrustedPrivateClassName", (Exception,), {})(_PRIVATE), "unexpected_error"),
++])
++def test_exception_details_are_replaced_by_fixed_categories(maintained, monkeypatch, failure, category):
++    def fail(path):
++        raise failure
++
++    monkeypatch.setattr(cloud, "maintain_vectors", fail)
++    result, _ = invoke(maintained[0])
++    _assert_failure(maintained, result, "maintain_vectors", category)
++    assert "UntrustedPrivateClassName" not in maintained[2].getvalue() + json.dumps(result)
++
++
++def test_exception_rendering_is_never_invoked(maintained, monkeypatch):
++    class PrivateError(Exception):
++        def __str__(self):
++            raise AssertionError("Exception rendering must not run")
++
++        def __repr__(self):
++            raise AssertionError("Exception rendering must not run")
++
++    def fail(path):
++        raise PrivateError(_PRIVATE)
++
++    monkeypatch.setattr(cloud, "maintain_vectors", fail)
++    result, _ = invoke(maintained[0])
++    _assert_failure(maintained, result, "maintain_vectors", "unexpected_error")
++
++
++@pytest.mark.parametrize("method, category", [("stats", "lookup_error"), ("optimize", "os_error")])
++def test_real_vector_maintenance_reports_inner_failures(maintained, monkeypatch, method, category):
++    world, _, _ = maintained
++    table_type = type(world.components[0].vectors._table)
++    backfill = cloud._backfill
++
++    def fail(*args, **kwargs):
++        raise (KeyError(_PRIVATE) if method == "stats" else OSError(_PRIVATE))
++
++    def finish_backfill(*args, **kwargs):
++        result = backfill(*args, **kwargs)
++        monkeypatch.setattr(table_type, method, fail)
++        return result
++
++    monkeypatch.setattr(vector, "_COMPACT_FRAGMENTS", 0)
++    monkeypatch.setattr(cloud, "_backfill", finish_backfill)
++    result, _ = invoke(world)
++    _assert_failure(maintained, result, "maintain_vectors", category)
++
++
++def test_optional_raw_marking_failure_still_publishes_without_fatal_diagnostic(maintained, monkeypatch):
++    world, _, stream = maintained
++
++    def fail(self, specs, now):
++        raise OSError(_PRIVATE)
++
++    monkeypatch.setattr(StateManager, "mark_raw", fail)
++    result, _ = invoke(world)
++    assert result["status"] == "completed" and result["generation"] == 2
++    assert result["cleanup"]["failures"] == 1
++    assert "maintenance_failure" not in result
++    assert not any(json.loads(line)["event"] == "maintenance_failed" for line in stream.getvalue().splitlines())
++    assert _PRIVATE not in stream.getvalue() + json.dumps(result)
++    released(world)
+diff --git a/tests/test_cloud_workflow.py b/tests/test_cloud_workflow.py
+index 0bb3792..344110b 100644
+--- a/tests/test_cloud_workflow.py
++++ b/tests/test_cloud_workflow.py
+@@ -1,6 +1,10 @@
+ """Static checks on the public writer workflow; no Actions execution or network."""
+ 
++import json
++import os
+ import re
++import subprocess
++import sys
+ from pathlib import Path
+ 
+ import pytest
+@@ -141,3 +145,34 @@ def test_secrets_stay_on_the_writer_step(workflow_path):
+     writer = next(s for s in job['steps'] if 'rikolto cloud ' in s.get('run', ''))
+     assert 'R2_SECRET_ACCESS_KEY' in writer['env']
+     assert not any('secrets.' in str(s) for s in job['steps'] if s is not writer)
++
++
++def test_source_issue_step_preserves_unpublished_failure_and_writes_safe_summary(tmp_path):
++    steps = load(WORKFLOWS / "cloud-run.yml")["jobs"]["run"]["steps"]
++    step = next(step for step in steps if step.get("name") == "Sync source health issues")
++    (tmp_path / "cloud-result.json").write_text(json.dumps({
++        "status": "failed", "exit_status": 1, "generation": None, "reason": "maintenance_failed",
++        "source_health": [{"source_id": "jp-synthetic", "status": "ok", "phase": None,
++                           "categories": {}, "consecutive_failures": 0, "first_failure_at": None}],
++        "sources": [{"error": "synthetic-secret"}],
++    }))
++    uv = tmp_path / "uv"
++    uv.write_text(f"#!{sys.executable}\nimport os, sys\n"
++                  'assert sys.argv[1:4] == ["run", "--frozen", "python"]\n'
++                  'os.execv(sys.executable, [sys.executable, *sys.argv[4:]])\n')
++    uv.chmod(0o755)
++    gh = tmp_path / "gh"
++    gh.write_text(f"#!{sys.executable}\nfrom pathlib import Path\n"
++                  f"Path({str(tmp_path / 'gh-called')!r}).touch()\nraise SystemExit(97)\n")
++    gh.chmod(0o755)
++    summary = tmp_path / "summary.md"
++    env = {**os.environ, "PATH": str(tmp_path) + os.pathsep + os.environ["PATH"],
++           "RUNNER_TEMP": str(tmp_path), "GITHUB_STEP_SUMMARY": str(summary),
++           "GH_REPO": "synthetic/repository", "GH_TOKEN": "synthetic-secret"}
++    response = subprocess.run(["bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", step["run"]],
++                              cwd=WORKFLOWS.parent.parent, env=env, capture_output=True, text=True, check=False)
++    assert response.returncode == 1 and response.stderr == ""
++    assert "::warning::" in response.stdout and "reason=unpublished_result" in response.stdout
++    assert "reason=unpublished_result" in summary.read_text()
++    assert "synthetic-secret" not in response.stdout + summary.read_text()
++    assert not (tmp_path / "gh-called").exists()
+diff --git a/tests/test_source_issues.py b/tests/test_source_issues.py
+index 32347ed..8168380 100644
+--- a/tests/test_source_issues.py
++++ b/tests/test_source_issues.py
+@@ -174,3 +174,118 @@ def test_existing_title_suffix_and_existing_label(fake_gh, tmp_path, suffix):
+     state = json.loads(fake_gh.read_text())
+     assert len(state["issues"]) == 1 and len(state["issues"][0]["comments"]) == 1
+     assert not any(call[:2] == ["issue", "create"] for call in state["calls"])
++
++
++@pytest.mark.parametrize("rows", [[], [health("ok", 0)]])
++@pytest.mark.parametrize("generation", [None, True, False, "2", 0, -1, 1.0])
++def test_invalid_generation_fails_closed_even_without_health_rows(fake_gh, tmp_path, rows, generation):
++    response = run_script(tmp_path, rows, generation)
++    assert response.returncode == 1
++    assert response.stderr == ""
++    assert "source_issues failures=1" in response.stdout
++    assert json.loads(fake_gh.read_text())["calls"] == []
++
++
++@pytest.mark.parametrize("result", [
++    {"source_health": []},
++    {"source_health": [health()]},
++    {"generation": 2},
++    {"generation": None},
++    {"generation": 2, "source_health": None},
++    {"generation": 2, "source_health": {}},
++    {"generation": 2, "source_health": ""},
++    [], None, "synthetic-secret",
++])
++def test_invalid_envelope_fails_closed(fake_gh, tmp_path, result):
++    path = tmp_path / "result.json"
++    path.write_text(json.dumps(result))
++    response = subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, check=False)
++    assert response.returncode == 1
++    assert response.stdout == "source_issues failures=1\n" and response.stderr == ""
++    assert json.loads(fake_gh.read_text())["calls"] == []
++
++
++def test_malformed_json_fails_closed_without_echoing_input(fake_gh, tmp_path):
++    path = tmp_path / "result.json"
++    path.write_text('{"generation": 2, "source_health": synthetic-secret}')
++    response = subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, check=False)
++    assert response.returncode == 1
++    assert response.stdout == "source_issues failures=1\n" and response.stderr == ""
++    assert json.loads(fake_gh.read_text())["calls"] == []
++
++
++@pytest.mark.parametrize("status", ["ok", "degraded", "failed", "missing", "deadline"])
++def test_unpublished_result_warns_without_any_issue_changes(fake_gh, tmp_path, monkeypatch, status):
++    state = json.loads(fake_gh.read_text())
++    state["labels"] = ["source-broken"]
++    state["issues"] = [{"number": 7, "title": "[source-broken] jp-synthetic", "comments": []}]
++    fake_gh.write_text(json.dumps(state))
++    summary = tmp_path / "summary.md"
++    summary.write_text("Existing summary\n")
++    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
++    response = run_script(tmp_path, [health(status)], None)
++    assert response.returncode == 1
++    assert "::warning::" in response.stdout and "reason=unpublished_result" in response.stdout
++    assert "source_issues failures=1" in response.stdout and response.stderr == ""
++    assert json.loads(fake_gh.read_text()) == state
++    assert summary.read_text().startswith("Existing summary\n")
++    assert "unpublished_result" in summary.read_text()
++    assert "recovery not confirmed" in summary.read_text()
++    assert "synthetic-secret" not in response.stdout + summary.read_text()
++    assert "https://" not in response.stdout + summary.read_text()
++
++
++def test_unpublished_result_remains_failure_when_summary_cannot_be_written(fake_gh, tmp_path, monkeypatch):
++    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(tmp_path))  # A directory, not a writable summary file.
++    response = run_script(tmp_path, [], None)
++    assert response.returncode == 1
++    assert "reason=unpublished_result" in response.stdout
++    assert "reason=summary_write_failed" in response.stdout
++    assert str(tmp_path) not in response.stdout and response.stderr == ""
++    assert json.loads(fake_gh.read_text())["calls"] == []
++
++
++def test_published_failed_round_still_opens_source_issue(fake_gh, tmp_path):
++    path = tmp_path / "result.json"
++    path.write_text(json.dumps({"status": "failed", "exit_status": 1, "reason": "source_failed",
++                                "generation": 3, "source_health": [health()]}))
++    response = subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, check=False)
++    assert response.returncode == 0 and response.stdout == "" and response.stderr == ""
++    issues = json.loads(fake_gh.read_text())["issues"]
++    assert len(issues) == 1 and "第 3 代" in issues[0]["body"]
++
++
++def test_published_degraded_result_still_recovers_matching_issue(fake_gh, tmp_path):
++    assert run_script(tmp_path, [health()]).returncode == 0
++    response = run_script(tmp_path, [health("degraded", 0)], 3)
++    assert response.returncode == 0 and response.stdout == "" and response.stderr == ""
++    issue = json.loads(fake_gh.read_text())["issues"][0]
++    assert issue["comments"] == ["已恢复（第 3 代）"] and issue["closed"]
++
++
++def test_skipped_round_without_source_health_remains_a_noop(fake_gh, tmp_path, monkeypatch):
++    path = tmp_path / "result.json"
++    path.write_text(json.dumps({"status": "skipped", "exit_status": 0,
++                                "reason": "跳过：写入租约已占用", "generation": None, "source_health": []}))
++    summary = tmp_path / "summary.md"
++    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
++    response = subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, check=False)
++    assert response.returncode == 0 and response.stdout == "" and response.stderr == ""
++    assert not summary.exists()
++    assert json.loads(fake_gh.read_text())["calls"] == []
++
++
++@pytest.mark.parametrize("status,exit_status,rows", [
++    ("skipped", False, []), ("skipped", "0", []), ("skipped", 1, []),
++    ("failed", 0, []), ("completed", 0, []),
++    ("skipped", 0, [health("ok", 0)]),
++])
++def test_unpublished_result_cannot_claim_skipped_with_invalid_outcome_or_health(
++        fake_gh, tmp_path, status, exit_status, rows):
++    path = tmp_path / "result.json"
++    path.write_text(json.dumps({"status": status, "exit_status": exit_status,
++                                "generation": None, "source_health": rows}))
++    response = subprocess.run([sys.executable, str(SCRIPT), str(path)], capture_output=True, text=True, check=False)
++    assert response.returncode == 1
++    assert "reason=unpublished_result" in response.stdout and response.stderr == ""
++    assert json.loads(fake_gh.read_text())["calls"] == []
