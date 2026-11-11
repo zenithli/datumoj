@@ -1,0 +1,38 @@
+{
+  "id": "capacity-budget-offline-design",
+  "name": "Offline capacity budget model",
+  "version": "0.1.0",
+  "status": "design-prototype-awaiting-board-review",
+  "purpose": "Project ordered write peaks and subsequent hypothetical cleanup from supplied integer-byte inputs.",
+  "runtime": "Python >=3.12; standard library only",
+  "permissions": [],
+  "network_access": false,
+  "cloud_access": false,
+  "inputs": [
+    "disjoint current prefix byte counts",
+    "chronological expected gross new physical bytes",
+    "hypothetical cleanup object identities and sizes",
+    "positive integer thresholds"
+  ],
+  "outputs": [
+    "before-write totals",
+    "after-write peaks",
+    "after-cleanup totals",
+    "signed threshold headroom",
+    "reached and exceeded threshold flags",
+    "projected scenario high-water"
+  ],
+  "errors": "Wrong input types raise TypeError. Invalid values or fields, conflicting object identities, undeclared prefixes, and prefix cleanup overdrafts raise ValueError.",
+  "data_source": "Caller-provided snapshots and synthetic scenarios; no retrieval.",
+  "data_license": "Synthetic fixtures and public issue facts only; no source datasets are included.",
+  "test_commands": [
+    "python -m unittest discover -v",
+    "python check_mutations.py"
+  ],
+  "limitations": [
+    "No account-wide completeness claim",
+    "No cleanup eligibility or backup verification",
+    "No production write or deletion authorization",
+    "No live enforcement"
+  ]
+}

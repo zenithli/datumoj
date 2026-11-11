@@ -1,0 +1,87 @@
+{
+  "task": "https://github.com/zenithli/datumoj/issues/1#issuecomment-6806340654",
+  "verified_at_utc": "2026-11-11T21:12:28Z",
+  "runtime": {
+    "python": "3.12.14",
+    "dependencies": "standard library only",
+    "optional_linter": "Ruff 0.17.1"
+  },
+  "scope": "standalone offline artifact; developer verification, not board acceptance",
+  "checks": [
+    {
+      "name": "unit_tests",
+      "exit_code": 0
+    },
+    {
+      "name": "behavior_mutations",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "compile_all_five_python_sources",
+      "exit_code": 0
+    },
+    {
+      "name": "saved_examples_equal_fresh_output",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "passed": 29,
+    "failed": 0,
+    "model_tests": 27,
+    "example_tests": 2
+  },
+  "mutation_checks": {
+    "killed": 4,
+    "required": 4,
+    "clean_model_before_and_after": true,
+    "actual_source_unchanged": true,
+    "output": [
+      "BASELINE: 27 tests passed",
+      "KILLED decide_from_cleanup_instead_of_peak: AssertionError: False is not true : PEAK_DECISION_MUST_USE_WRITE_PEAK",
+      "KILLED subtract_every_generation_reference: AssertionError: 60 != 30 : SHARED_PHYSICAL_CLEANUP_ONCE",
+      "KILLED zero_balances_when_no_writes: AssertionError: 0 != 30 : EMPTY_WRITES_KEEP_BALANCE",
+      "KILLED equality_not_reached: AssertionError: False is not true : EQUALITY_IS_REACHED",
+      "RESTORED BASELINE: 27 tests passed",
+      "4/4 behavior mutants killed by their intended assertion failures",
+      "Real model source unchanged (byte-for-byte)"
+    ]
+  },
+  "commands_from_artifact_directory": [
+    "python -B -m unittest discover -v",
+    "python -B check_mutations.py",
+    "python -B examples.py",
+    "ruff check --no-cache --isolated --select E,F,I,B,S,BLE,SIM --ignore E501 ."
+  ],
+  "review": {
+    "developer_review_findings": {
+      "critical": 0,
+      "important": 0,
+      "minor": 0
+    },
+    "board_acceptance": false
+  },
+  "not_performed": [
+    "Full datumoj repository regression",
+    "PR #173 changes or live integration",
+    "Cloud or R2 reads or writes",
+    "Production execution or changes",
+    "Deletion or archive operations",
+    "Upstream repository push or pull request"
+  ],
+  "source_files_sha256": {
+    "README.md": "9aebac896c4ff43c7af5d539f64a33dc47eb433c452e8ec5cb9717246885a982",
+    "budget_model.py": "481cf573ace68b3b06762a3718e0f4da2dd1cfa5edbaf97af67dc74e663a4bac",
+    "check_mutations.py": "74b2e92a2ba72d9ec99f9701e7aecc59b52089946fefa46df95782858bbb35b3",
+    "example_results.json": "b3e80ae7b3bff0406781e7786645096d7ffc58a60975d20a7a8f4795f7f27371",
+    "examples.py": "1fd64262ca6996ff81dcd32554c26f0f9da68b3fa584166caba2b919cc8938bd",
+    "module.json": "8e4ba83444b01e60c3b091ee4aa99e9e025f1ac47eaa21012e17711a69d1e2ef",
+    "test_budget_model.py": "31f6581b93a490e3e175520f89bbef0b955146b845a8b2cf2bd0ffc44eae2d90",
+    "test_examples.py": "f4b20d61ca57baf39d1e82738fa6a86d34635b9a2f62597f48af5b94f1ac93ca"
+  },
+  "record_note": "Test execution record precedes delivery. Publishing the same artifact to the designated review branch is reported separately on issue #1."
+}

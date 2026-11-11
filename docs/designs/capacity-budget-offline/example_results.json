@@ -1,0 +1,286 @@
+{
+  "warning": "Offline scenarios only; no account-wide measurement or permission to write/delete.",
+  "small_hand_calculation": {
+    "input": {
+      "current_prefix_bytes": {
+        "raw": 90
+      },
+      "rounds": [
+        {
+          "writes_by_prefix": {
+            "raw": 30
+          },
+          "cleanup": [
+            {
+              "object_id": "synthetic:retired-raw:v1",
+              "prefix": "raw",
+              "size_bytes": 40
+            }
+          ]
+        }
+      ],
+      "thresholds": {
+        "cap": 100
+      }
+    },
+    "expected_totals": {
+      "before": 90,
+      "peak": 120,
+      "after": 80
+    },
+    "projection": {
+      "scope": {
+        "kind": "supplied_prefixes_only",
+        "prefixes": [
+          "raw"
+        ],
+        "inventory_assumption": "complete_disjoint_inventory_for_supplied_scope",
+        "account_wide_completeness_verified": false,
+        "physical_object_existence_verified": false,
+        "cleanup_eligibility_verified": false,
+        "historical_observed_high_water_verified": false
+      },
+      "cleanup_assumption": "caller_supplied_hypothetical_eligible_physical_objects",
+      "identity_assumption": "caller_supplied_scope_qualified_immutable_physical_object_ids",
+      "thresholds_are_operational_permission": false,
+      "thresholds": {
+        "cap": 100
+      },
+      "initial": {
+        "by_prefix": {
+          "raw": 90
+        },
+        "total_bytes": 90,
+        "headroom_bytes": {
+          "cap": 10
+        }
+      },
+      "rounds": [
+        {
+          "round_index": 1,
+          "before_write_by_prefix": {
+            "raw": 90
+          },
+          "before_write_bytes": 90,
+          "expected_writes_by_prefix": {
+            "raw": 30
+          },
+          "expected_write_bytes": 30,
+          "after_write_by_prefix": {
+            "raw": 120
+          },
+          "write_peak_bytes": 120,
+          "unique_cleanup_by_prefix": {
+            "raw": 40
+          },
+          "unique_cleanup_bytes": 40,
+          "after_cleanup_by_prefix": {
+            "raw": 80
+          },
+          "after_cleanup_bytes": 80,
+          "thresholds": {
+            "cap": {
+              "threshold_bytes": 100,
+              "before_headroom_bytes": 10,
+              "peak_headroom_bytes": -20,
+              "after_cleanup_headroom_bytes": 20,
+              "reached": true,
+              "exceeded": true
+            }
+          }
+        }
+      ],
+      "projected_high_water_bytes": 120,
+      "final_by_prefix": {
+        "raw": 80
+      },
+      "final_bytes": 80
+    }
+  },
+  "reported_bucket_with_hypothetical_events": {
+    "baseline_source": "https://github.com/zenithli/datumoj/issues/1#issuecomment-6782541584",
+    "baseline_reported_at": "2026-11-11T08:30:00+09:00",
+    "baseline_independently_remeasured": false,
+    "events_are_hypothetical": true,
+    "input": {
+      "current_prefix_bytes": {
+        "reported_bucket": 8800774448
+      },
+      "rounds": [
+        {
+          "writes_by_prefix": {
+            "reported_bucket": 250000000
+          },
+          "cleanup": [
+            {
+              "object_id": "synthetic:retired-object:v1",
+              "prefix": "reported_bucket",
+              "size_bytes": 600000000
+            }
+          ]
+        },
+        {
+          "writes_by_prefix": {
+            "reported_bucket": 49225552
+          },
+          "cleanup": [
+            {
+              "object_id": "synthetic:retired-object:v1",
+              "prefix": "reported_bucket",
+              "size_bytes": 600000000
+            },
+            {
+              "object_id": "synthetic:retired-object:v1",
+              "prefix": "reported_bucket",
+              "size_bytes": 600000000
+            }
+          ]
+        }
+      ]
+    },
+    "expected_totals": {
+      "round1_before": 8800774448,
+      "round1_peak": 9050774448,
+      "round1_after": 8450774448,
+      "round2_peak_and_after": 8500000000,
+      "scenario_high_water": 9050774448
+    },
+    "projection": {
+      "scope": {
+        "kind": "supplied_prefixes_only",
+        "prefixes": [
+          "reported_bucket"
+        ],
+        "inventory_assumption": "complete_disjoint_inventory_for_supplied_scope",
+        "account_wide_completeness_verified": false,
+        "physical_object_existence_verified": false,
+        "cleanup_eligibility_verified": false,
+        "historical_observed_high_water_verified": false
+      },
+      "cleanup_assumption": "caller_supplied_hypothetical_eligible_physical_objects",
+      "identity_assumption": "caller_supplied_scope_qualified_immutable_physical_object_ids",
+      "thresholds_are_operational_permission": false,
+      "thresholds": {
+        "warning_7gb": 7000000000,
+        "freeze_8_5gb": 8500000000,
+        "stop_9gb": 9000000000
+      },
+      "initial": {
+        "by_prefix": {
+          "reported_bucket": 8800774448
+        },
+        "total_bytes": 8800774448,
+        "headroom_bytes": {
+          "warning_7gb": -1800774448,
+          "freeze_8_5gb": -300774448,
+          "stop_9gb": 199225552
+        }
+      },
+      "rounds": [
+        {
+          "round_index": 1,
+          "before_write_by_prefix": {
+            "reported_bucket": 8800774448
+          },
+          "before_write_bytes": 8800774448,
+          "expected_writes_by_prefix": {
+            "reported_bucket": 250000000
+          },
+          "expected_write_bytes": 250000000,
+          "after_write_by_prefix": {
+            "reported_bucket": 9050774448
+          },
+          "write_peak_bytes": 9050774448,
+          "unique_cleanup_by_prefix": {
+            "reported_bucket": 600000000
+          },
+          "unique_cleanup_bytes": 600000000,
+          "after_cleanup_by_prefix": {
+            "reported_bucket": 8450774448
+          },
+          "after_cleanup_bytes": 8450774448,
+          "thresholds": {
+            "warning_7gb": {
+              "threshold_bytes": 7000000000,
+              "before_headroom_bytes": -1800774448,
+              "peak_headroom_bytes": -2050774448,
+              "after_cleanup_headroom_bytes": -1450774448,
+              "reached": true,
+              "exceeded": true
+            },
+            "freeze_8_5gb": {
+              "threshold_bytes": 8500000000,
+              "before_headroom_bytes": -300774448,
+              "peak_headroom_bytes": -550774448,
+              "after_cleanup_headroom_bytes": 49225552,
+              "reached": true,
+              "exceeded": true
+            },
+            "stop_9gb": {
+              "threshold_bytes": 9000000000,
+              "before_headroom_bytes": 199225552,
+              "peak_headroom_bytes": -50774448,
+              "after_cleanup_headroom_bytes": 549225552,
+              "reached": true,
+              "exceeded": true
+            }
+          }
+        },
+        {
+          "round_index": 2,
+          "before_write_by_prefix": {
+            "reported_bucket": 8450774448
+          },
+          "before_write_bytes": 8450774448,
+          "expected_writes_by_prefix": {
+            "reported_bucket": 49225552
+          },
+          "expected_write_bytes": 49225552,
+          "after_write_by_prefix": {
+            "reported_bucket": 8500000000
+          },
+          "write_peak_bytes": 8500000000,
+          "unique_cleanup_by_prefix": {
+            "reported_bucket": 0
+          },
+          "unique_cleanup_bytes": 0,
+          "after_cleanup_by_prefix": {
+            "reported_bucket": 8500000000
+          },
+          "after_cleanup_bytes": 8500000000,
+          "thresholds": {
+            "warning_7gb": {
+              "threshold_bytes": 7000000000,
+              "before_headroom_bytes": -1450774448,
+              "peak_headroom_bytes": -1500000000,
+              "after_cleanup_headroom_bytes": -1500000000,
+              "reached": true,
+              "exceeded": true
+            },
+            "freeze_8_5gb": {
+              "threshold_bytes": 8500000000,
+              "before_headroom_bytes": 49225552,
+              "peak_headroom_bytes": 0,
+              "after_cleanup_headroom_bytes": 0,
+              "reached": true,
+              "exceeded": false
+            },
+            "stop_9gb": {
+              "threshold_bytes": 9000000000,
+              "before_headroom_bytes": 549225552,
+              "peak_headroom_bytes": 500000000,
+              "after_cleanup_headroom_bytes": 500000000,
+              "reached": false,
+              "exceeded": false
+            }
+          }
+        }
+      ],
+      "projected_high_water_bytes": 9050774448,
+      "final_by_prefix": {
+        "reported_bucket": 8500000000
+      },
+      "final_bytes": 8500000000
+    }
+  }
+}
