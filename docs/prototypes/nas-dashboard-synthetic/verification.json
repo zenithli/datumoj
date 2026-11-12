@@ -1,0 +1,94 @@
+{
+  "scope": "offline_synthetic_candidate_only",
+  "verified_at_utc": "2026-11-12T04:48:54+00:00",
+  "runtime": {
+    "os": "Linux",
+    "node": "24.22.1",
+    "python": "3.12.14"
+  },
+  "tests": [
+    {
+      "command": "node --test tests/*.test.js",
+      "passed": 71,
+      "failed": 0,
+      "exit_code": 0
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py' -v",
+      "passed_groups": 13,
+      "failed_groups": 0,
+      "exit_code": 0
+    },
+    {
+      "check": "JavaScript syntax, Python compilation, Ruff, shell syntax",
+      "result": "pass"
+    },
+    {
+      "check": "deterministic synthetic build and exact output allowlist",
+      "result": "pass",
+      "output_files": [
+        "index.html",
+        "styles.css",
+        "app.js",
+        "model.js",
+        "poller.js",
+        "status.json",
+        "welcome.css",
+        "welcome.js",
+        "welcome-scene.svg"
+      ]
+    }
+  ],
+  "browser_checks": {
+    "browser": "Chromium-based cloud browser",
+    "observed": [
+      "Desktop rendering and synthetic/unknown labels",
+      "390px iframe layout without horizontal overflow",
+      "Manual refresh, polling toggle and history navigation",
+      "Page-read time separate from old receipt and evidence dates",
+      "Integrated welcome present on load and dismissed automatically",
+      "Hash navigation does not replay welcome",
+      "Click skip moves focus to main when skip had focus",
+      "Focused skip followed by timer moves focus to main",
+      "Original welcome art in 390px static visual harness"
+    ],
+    "not_exercised": [
+      "System reduced-motion preference (source and tests checked only)",
+      "Other browser engines",
+      "Screen reader interaction"
+    ],
+    "console_note": "No application console error observed; browser-extension metadata errors were present."
+  },
+  "constraints": [
+    "Synthetic fixture only; fixed dates in 2000.",
+    "No live NAS/R2/account connection, credentials, collector or real-data adapter.",
+    "No Pages, production deployment, deletion, backup trigger or automatic publishing schedule.",
+    "Actual collection cadence and permitted public fields remain unconfirmed.",
+    "Development verification is not project-board acceptance or backup-safety approval.",
+    "Builder assumes a trusted local directory, not hostile concurrent filesystem mutation.",
+    "Windows and Node20 were not separately tested."
+  ],
+  "file_sha256": {
+    "README.md": "73a5466de4038d3cb5de56d75f4ff5b1f91ce17964791ff86a9d660cecf71438",
+    "REVIEW_CHECKLIST.md": "9494fd0bb93f06a6242b1a7ae579440f6d8bd55fb38151a4e119a86436801942",
+    "examples/build-synthetic.sh": "d9523128a05ca63ed40f2ce7c7dec55adbec831ae77440dfe8eb94d6bb15a2fe",
+    "examples/synthetic-status.json": "c4068509ba64bac41d759cdc7799ab4c4e7c8f63a573d8a33104cc9f1bb109a4",
+    "package.json": "9e947ae11939b0759d9714f13a2b8084628d606bb44c2d28439410497bac33e4",
+    "tests/app.test.js": "08fa018014bff65af4c32a4d2e12ceb56a49848853628f20d55e145e96e0f3bb",
+    "tests/model.test.js": "4e911fd6210295e81ee4eaf5643c29526bd20d72ed7961b0dde3ed400c2cf612",
+    "tests/poller.test.js": "039e0ae6fc364c6b47e12cc62fcfcc386b8732a9499d392844bc8f5890ca3071",
+    "tests/test_build.py": "8489e506ce6bdc335427467dcd79bb4e69a55eba1cdba5ead461a0ce3d6a7ebd",
+    "tests/welcome.test.js": "065b21d47be4eee1ced69f38578079f484c7d2644e4c2714c15a50e1b38c631e",
+    "tools/build.py": "75b2b17283e15383da036712287140383f72e2fa7532a482a6e22228df5aacb7",
+    "web/app.js": "c517e351776a2ec53ca99d4a94dbb5c9f3a04aa95339524fd1ad160b1487d55f",
+    "web/index.html": "cb958034320e14421f39e4fffb1504fdb75866db2debc4032df6ef54d0e97639",
+    "web/model.js": "c24252afca5f3b83d43d55ed016055431b16bb8f9b92e3bc61406c4dce91b788",
+    "web/poller.js": "af529317aa380303b2c1908d4cc7e5430d1bfbf711a546dc95dc8733229426eb",
+    "web/status.json": "c4068509ba64bac41d759cdc7799ab4c4e7c8f63a573d8a33104cc9f1bb109a4",
+    "web/styles.css": "4e13a1495301640310808c285e47d9f5472d1513b8250f3f00eae278d896836e",
+    "web/welcome-scene.svg": "4dac706f940909fd28cc6f83302203af356b33a6e52fc311bf78290c77cf9eca",
+    "web/welcome.css": "05fe3994aa0a0aaca9c2788e1053111018738da2c93b31b28a833a4740190bd2",
+    "web/welcome.js": "c2031bd766ae41ffdf3f5f02ebf511f90d324849a5cbb82f746c9f35a380ba15"
+  },
+  "hash_note": "Hashes cover the other20 source/test/doc files, excluding this verification record."
+}

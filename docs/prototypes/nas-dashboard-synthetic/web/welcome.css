@@ -1,0 +1,14 @@
+/* Original pixel scene. CSS dismissal is the fallback when JavaScript is unavailable. */
+#welcome-cover{position:fixed;inset:0;z-index:100;background:#071b20;color:#edf6e5;display:grid;place-items:center;overflow:hidden;pointer-events:auto;animation:welcome-dismiss 1s linear forwards}
+#welcome-cover[hidden]{display:none}
+.welcome-inner{position:relative;width:min(100%,1040px);text-align:center;padding:32px 24px}
+.welcome-kicker{font:500 10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:3px;color:#96b8a7;margin:0 0 18px}
+.welcome-title{font-size:clamp(38px,7vw,66px);font-weight:600;letter-spacing:-3px;line-height:1.1;margin:0;color:#e1f1d7}
+.welcome-copy{font-size:13px;letter-spacing:2px;margin:15px 0 0;color:#9db8ab}
+.welcome-scene{display:block;width:100%;height:auto;max-height:48vh;margin:-15px auto -24px;object-fit:contain;image-rendering:pixelated}
+.welcome-foot{font:10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;color:#73948d;margin:16px 0 0}
+@keyframes welcome-dismiss{0%,88%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
+@media(max-width:650px){.welcome-inner{padding:24px 12px}.welcome-kicker{font-size:8px;letter-spacing:2px}.welcome-title{letter-spacing:-2px}.welcome-copy{font-size:11px;letter-spacing:1px}.welcome-scene{width:150%;max-width:none;margin:12px 0 -5px -25%;max-height:45vh}.welcome-foot{font-size:8px}}
+@media(prefers-reduced-motion:reduce){#welcome-cover{animation-timing-function:steps(1,end)}}
+
+#welcome-skip{margin-top:18px;background:transparent;color:#bad0c1;border:1px solid #426457;border-radius:6px;padding:8px 13px;font-family:inherit;font-size:11px;line-height:1.3;cursor:pointer}#welcome-skip:focus-visible{outline:2px solid #d5c389;outline-offset:4px}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="description" content="离线 NAS 回执展示候选。仅合成数据，未接入真实 NAS。">
+  <title>datumoj · NAS · 合成演示候选</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./welcome.css">
+  <link rel="preload" as="image" href="./welcome-scene.svg">
+  <script type="module" src="./app.js"></script>
+  <script type="module" src="./welcome.js"></script>
+</head>
+<body>
+  <div id="welcome-cover" aria-label="欢迎进入 datumoj"><div class="welcome-inner"><div aria-hidden="true"><p class="welcome-kicker">A LITTLE WORLD FOR YOUR DATA</p><p class="welcome-title">datumoj</p><p class="welcome-copy">数据在这里，相遇与留存。</p><img class="welcome-scene" src="./welcome-scene.svg" alt="" width="960" height="400"><p class="welcome-foot">正在进入备份工作台 · 约 1 秒</p></div><button id="welcome-skip" type="button" aria-label="跳过欢迎页，进入仪表盘">直接进入 <span aria-hidden="true">↗</span></button></div></div>
+  <a class="skip" href="#main">跳到主要内容</a>
+  <aside class="sidebar" aria-label="页面导航">
+    <a class="brand" href="#overview"><span class="brand-mark" aria-hidden="true">▥</span><span>datumoj · NAS<small>EVIDENCE WORKSPACE</small></span></a>
+    <div class="workspace"><span class="workspace-mark" aria-hidden="true">N</span><div>离线演示空间<small>仅供审阅的静态候选</small></div></div>
+    <p class="nav-label">工作台</p>
+    <nav>
+      <a class="nav active" href="#overview"><span aria-hidden="true">◫</span>NAS 概览</a>
+      <a class="nav" href="#evidence"><span aria-hidden="true">▤</span>历史证据</a>
+      <a class="nav" href="#boundaries"><span aria-hidden="true">◇</span>判断边界</a>
+    </nav>
+    <div class="sidebar-bottom"><span class="demo-dot" aria-hidden="true"></span>合成数据模式<p>本页不连接 NAS。<br>无需 AI 服务即可运行。<br>没有删除或恢复操作。</p></div>
+  </aside>
+  <div class="app">
+    <header class="topbar"><p class="breadcrumb">工作台 <span>/</span> <strong>NAS 回执</strong></p><span class="top-tag">离线候选 · 未接入</span></header>
+    <main id="main" tabindex="-1">
+      <section id="overview" aria-labelledby="page-title">
+        <div class="page-heading"><div><p class="eyebrow">NAS FIRST · EVIDENCE SEPARATELY</p><h1 id="page-title">先看 NAS，再看证据</h1><p>任务完成、快照清点、内容校验与抽样恢复，各自独立判断。</p></div><span class="candidate-label">待审阅候选</span></div>
+        <div class="demo-banner"><span aria-hidden="true">!</span><div><strong>演示候选 · 合成数据 · 未接入真实 NAS</strong><p>回执内数值均为虚构示例，日期固定在 2000 年。页面读取时间不代表真实 NAS 的实时状态。</p></div></div>
+        <div class="nas-hero"><div><p class="eyebrow">CURRENT EVIDENCE</p><h2>当前状态：未知</h2><p>采集节奏未确认。文件刷新不会把历史观测变成当前成功。</p></div><span class="state">独立检查 · 无总体安全结论</span></div>
+        <div class="refresh-bar"><div><p id="live-status" role="status" aria-live="polite" aria-atomic="true">尚未读取有效合成回执，当前状态未知</p><p id="last-fetch-state" class="muted">等待本地示例文件</p></div><div class="refresh-controls"><label><input id="auto-refresh" type="checkbox" checked>每 60 秒读取示例文件</label><button id="refresh" type="button">立即刷新示例</button></div></div>
+        <p class="polling-note">这是页面轮询演示，不是 NAS 自动采集或实时更新。关闭轮询后，页面仍每 60 秒重新计算证据是否过期。</p>
+        <p id="transport-warning" class="warning" role="alert" hidden></p>
+        <noscript><p class="warning">JavaScript 未启用。当前状态未知；下方没有动态读取的回执。</p></noscript>
+        <div class="metric-grid">
+          <article class="metric"><div class="metric-label">最近一次任务<span>仅任务执行</span></div><p id="last_attempt-status" class="metric-value">未知</p><p id="last_attempt-reason" class="metric-foot">采集节奏未确认</p><p class="observed">观测于 <time id="last_attempt-time">未知</time></p></article>
+          <article class="metric"><div class="metric-label">快照清点<span>仅声明快照</span></div><p id="inventory_check-status" class="metric-value">未知</p><p id="inventory_check-reason" class="metric-foot">采集节奏未确认</p><p class="observed">观测于 <time id="inventory_check-time">未知</time></p></article>
+          <article class="metric"><div class="metric-label">内容校验<span>区分抽样与全快照</span></div><p id="content_check-status" class="metric-value">未知</p><p id="content_check-reason" class="metric-foot">采集节奏未确认</p><p class="observed">观测于 <time id="content_check-time">未知</time></p></article>
+          <article class="metric"><div class="metric-label">恢复演练<span>仅抽样恢复</span></div><p id="restore_check-status" class="metric-value">未知</p><p id="restore_check-reason" class="metric-foot">采集节奏未确认</p><p class="observed">观测于 <time id="restore_check-time">未知</time></p></article>
+        </div>
+      </section>
+      <section id="evidence" aria-labelledby="evidence-title">
+        <div class="section-heading"><h2 id="evidence-title">合成历史记录</h2><p>下面是历史证据，不是当前通过状态。缺失值保留为未知。</p></div>
+        <div class="two-col">
+          <article class="panel"><div class="panel-head"><span class="step">01</span><div><h3>任务回执</h3><p>任务完成不能替代清点、哈希或恢复检查。</p></div></div><dl class="evidence-list"><dt>历史结果</dt><dd id="job-result">未知</dd><dt>开始时间（UTC）</dt><dd id="job-started">未知</dd><dt>完成时间（UTC）</dt><dd id="job-completed">未知</dd><dt>错误数</dt><dd id="job-errors">未知</dd></dl><p class="panel-note">成功仅表示该任务报告完成。</p></article>
+          <article class="panel"><div class="panel-head"><span class="step">02</span><div><h3>快照清点记录</h3><p>零差异只覆盖这次声明的快照范围。</p></div></div><dl class="evidence-list"><dt>检查范围</dt><dd id="inventory-scope">未知</dd><dt>已检查对象</dt><dd id="inventory-checked">未知</dd><dt>缺失对象</dt><dd id="inventory-missing">未知</dd><dt>大小不一致</dt><dd id="inventory-mismatches">未知</dd></dl><p class="panel-note">检查 0 个对象不能证明完整性。</p></article>
+          <article class="panel"><div class="panel-head"><span class="step">03</span><div><h3>内容校验记录</h3><p>抽样一致与快照内全量一致是不同的证据。</p></div></div><dl class="evidence-list"><dt>检查范围</dt><dd id="content-scope">未知</dd><dt>已检查对象</dt><dd id="content-checked">未知</dd><dt>哈希不一致</dt><dd id="content-mismatches">未知</dd></dl><p class="panel-note">快照内全量也不代表当前全部源数据已备份。</p></article>
+          <article class="panel"><div class="panel-head"><span class="step">04</span><div><h3>恢复演练记录</h3><p>演练只覆盖记录中的样本。</p></div></div><dl class="evidence-list"><dt>检查范围</dt><dd id="restore-scope">未知</dd><dt>历史结果</dt><dd id="restore-result">未知</dd><dt>已检查对象</dt><dd id="restore-checked">未知</dd></dl><p class="panel-note">抽样恢复通过不能证明任意对象都能恢复。</p></article>
+        </div>
+        <div class="receipt-meta"><div><span>回执生成时间（UTC）</span><time id="receipt-generated">未知</time></div><div><span>上次成功读取示例文件（UTC）</span><time id="page-read-time">未知</time><small>仅页面读取，不是 NAS 观测或备份时间</small></div><p>仅文件生成时间，不代表 NAS 观测时间。四项观测时间独立，不能互相续期。</p></div>
+      </section>
+      <section id="boundaries" class="boundary-panel" aria-labelledby="boundaries-title"><div><p class="eyebrow">READ BEFORE YOU DECIDE</p><h2 id="boundaries-title">证据有范围，结论有边界</h2></div><ul><li>真实采集接口与有效期尚未确认，默认不作任何当前通过判断。</li><li>读取失败、记录过期、时间倒退或无法比较时，当前状态保持未知，可保留标注清楚的历史记录。</li><li>不能据此删除源文件、清空回收站，或认定数据已安全备份。</li></ul></section>
+      <footer><span>datumoj · NAS · 合成演示候选</span><span>仅同源静态文件 · 无 AI 依赖 · 无真实 NAS 连接</span></footer>
+    </main>
+  </div>
+</body>
+</html>

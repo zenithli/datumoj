@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "data_mode": "synthetic",
+  "generated_at": "2000-01-02T12:00:00Z",
+  "nas": {
+    "last_attempt": {
+      "observed_at": "2000-01-02T11:55:00Z",
+      "started_at": "2000-01-02T11:40:00Z",
+      "completed_at": "2000-01-02T11:50:00Z",
+      "result": "success",
+      "error_count": 0
+    },
+    "inventory_check": {
+      "observed_at": "2000-01-02T11:30:00Z",
+      "scope": "reported_snapshot",
+      "checked_objects": 120,
+      "missing_objects": 0,
+      "size_mismatches": 0
+    },
+    "content_check": {
+      "observed_at": "2000-01-02T10:20:00Z",
+      "scope": "sample",
+      "checked_objects": 12,
+      "hash_mismatches": 0
+    },
+    "restore_check": {
+      "observed_at": "2000-01-01T15:00:00Z",
+      "scope": "sample",
+      "result": "passed",
+      "checked_objects": 3
+    }
+  }
+}
